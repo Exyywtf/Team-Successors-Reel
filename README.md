@@ -1,54 +1,102 @@
-# Remotion video
+# TeamSuccessorsReel
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+Premium Remotion-based social promo reel workspace for Team Successors. This repository is intentionally separate from the main website repository so reel production can move independently.
 
-Welcome to your Remotion project!
+## Why this repo exists
 
-## Commands
+The reel has a different workflow from the website: frame-accurate sequencing, motion tuning, and render/export iteration. Keeping this codebase isolated makes it safer to experiment on scenes, timings, and visual direction without coupling those changes to website delivery.
 
-**Install Dependencies**
+## Current status
 
-```console
-npm i
+- In-progress production base for a premium vertical reel.
+- Active composition: `SuccessorsReel` in `1080x1920`, `30fps`, `660` total frames (~22s).
+- Core scene stack, shared components, theme tokens, motion helpers, and local assets are in place.
+- Timing is currently mid-refinement: scene comments in some files are older than the sequence wiring, so treat `src/compositions/Reel.tsx` and `src/lib/timing.ts` as the source of truth.
+
+## What's in the reel
+
+Current render order in `src/compositions/Reel.tsx`:
+
+1. `S01UrlIntro` - URL search bubble intro with typewriter and atmospheric bloom.
+2. `S02HeroReveal` - hero video reveal with logo, headline, and team positioning copy.
+3. `S03Engineering` - engineering proof sequence (CFD visual + design/validation cards).
+4. `S04DesktopShowcase` - 2.5D desktop website showcase with parallax and sponsor section reveal.
+5. `S05MetricsRoadmap` - rapid impact beats (nationals, impressions, student reach).
+6. `S06CtaEndFrame` - sponsor-focused CTA end frame with URL and partner logos.
+
+## Project structure
+
+```text
+TeamSuccessorsReel/
+  public/
+    assets/                  # Local reel assets (video, images, SVG logos)
+  src/
+    compositions/
+      Reel.tsx               # Main scene assembly using Sequences
+    scenes/                  # Scene-level motion and layout
+    components/              # Reusable visual building blocks
+    lib/                     # Timing map, springs, theme, fonts, helpers
+    Root.tsx                 # Composition registration (SuccessorsReel)
+    index.ts                 # Remotion entry
+  remotion.config.ts         # Remotion CLI config + Tailwind integration
+  package.json               # Scripts and dependencies
 ```
 
-**Start Preview**
+## Assets
 
-```console
+All reel media required for rendering is stored locally under `public/assets`. This includes hero media, engineering visuals, timeline graphics, and sponsor marks used by the current scenes. Assets are kept inside this repository so renders are reproducible without dependency on the website repo.
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start Remotion Studio:
+
+```bash
 npm run dev
 ```
 
-**Render video**
+Type/lint check:
 
-```console
-npx remotion render
+```bash
+npm run lint
 ```
 
-**Upgrade Remotion**
+Bundle project:
 
-```console
-npx remotion upgrade
+```bash
+npm run build
 ```
 
-## Docs
+## Rendering
 
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
+Render the current composition to MP4:
 
-## Help
+```bash
+npx remotion render SuccessorsReel out/TeamSuccessorsReel.mp4
+```
 
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
+## Tech stack
 
-## Issues
+- Remotion `4.0.434` + `@remotion/cli`
+- React `19.2.3` + React DOM
+- TypeScript `5.9`
+- Tailwind CSS `v4` via `@remotion/tailwind-v4`
+- Google font loading via `@remotion/google-fonts` (Orbitron, Montserrat)
+- ESLint + Prettier for code quality
 
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
+## Notes for future edits
 
-## License
+- Keep timeline edits centralized in `src/lib/timing.ts`, then verify scene sequencing in `src/compositions/Reel.tsx`.
+- Treat scene-level frame comments as advisory and re-sync them whenever timings change.
+- Reuse `src/lib/springs.ts`, `src/lib/theme.ts`, and `src/lib/fonts.ts` before adding one-off motion/style values.
+- Preserve visual continuity between scenes, especially overlap transitions and fade envelopes.
+- Keep all new reel media in `public/assets` and reference via `staticFile(...)` for deterministic renders.
 
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+## Website repo separation
+
+This reel repo is separate from the main Team Successors website repo. Work done here should not modify `C:\Users\Admin\dev\TeamSuccessors`.
