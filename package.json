@@ -11,9 +11,15 @@
     "@remotion/light-leaks": "4.0.434",
     "@remotion/tailwind-v4": "4.0.434",
     "@remotion/transitions": "4.0.434",
+    "clsx": "2.1.1",
+    "framer-motion": "12.0.0",
+    "lucide-react": "0.469.0",
+    "motion-dom": "12.0.0",
+    "motion-utils": "12.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "remotion": "4.0.434",
+    "tailwind-merge": "2.6.0",
     "tailwindcss": "4.0.0"
   },
   "devDependencies": {

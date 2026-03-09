@@ -1,0 +1,511 @@
+{
+  "teamInfo": {
+    "name": "Successors",
+    "tagline": "Inheriting the Legacy",
+    "school": "GEMS Founders School",
+    "location": "Dubai, UAE",
+    "email": "successorsf1@gmail.com",
+    "colors": {
+      "primary": "#3A0CA3",
+      "accent": "#E5B80B",
+      "background": "#050505",
+      "surface": "#1A1A1A",
+      "text": "#F5F5F5"
+    }
+  },
+  "navigation": [
+    { "label": "Home", "href": "/" },
+    { "label": "Team", "href": "/team" },
+    { "label": "Engineering", "href": "/engineering" },
+    { "label": "Enterprise", "href": "/enterprise" },
+    { "label": "Sponsors", "href": "/sponsors" },
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "hero": {
+    "headline": "Inheriting the Legacy. Defining the Future.",
+    "subheadline": "We are Successors, an F1 in Schools team building precision engineering, measurable partner value, and high-impact STEM outreach.",
+    "ctaPrimary": {
+      "label": "Meet the Team",
+      "href": "/team"
+    },
+    "ctaSecondary": {
+      "label": "Sponsor Us",
+      "href": "/enterprise"
+    },
+    "kineticWords": [
+      "LEGACY",
+      "PRECISION",
+      "CFD",
+      "SUCCESSORS",
+      "CNC",
+      "VELOCITY"
+    ]
+  },
+  "home": {
+    "sponsorStripTitle": "Trusted by sponsors powering our race to nationals.",
+    "highlights": [
+      {
+        "title": "National Finals Momentum",
+        "description": "Race-ready development roadmap aligned to the UAE F1 in Schools National Finals timeline.",
+        "metric": "Q2 Race Window"
+      },
+      {
+        "title": "Engineering Precision",
+        "description": "End-to-end workflow from CAD surfacing to CFD iteration and CNC production accuracy.",
+        "metric": "0.1mm tolerance target"
+      },
+      {
+        "title": "Sponsor ROI",
+        "description": "Activation strategy built for visibility, content production, and measurable outreach.",
+        "metric": "100k+ LinkedIn impressions"
+      },
+      {
+        "title": "Community Reach",
+        "description": "STEM engagement programs delivered through school and partner ecosystems.",
+        "metric": "6,000+ student access"
+      }
+    ],
+    "engineeringSnapshot": [
+      {
+        "stage": "Design",
+        "detail": "Autodesk Fusion 360 aerodynamic modeling with rapid iteration loops."
+      },
+      {
+        "stage": "Analyze",
+        "detail": "Ansys CFD studies to cut drag, stabilize flow, and improve race performance."
+      },
+      {
+        "stage": "Manufacture",
+        "detail": "Lunyee 3018 Pro Ultra CNC machining and controlled finishing workflow."
+      }
+    ],
+    "outreachSnapshot": {
+      "title": "Outreach That Moves Beyond The Track",
+      "description": "Our enterprise program links competition excellence with educational impact and sponsor storytelling.",
+      "bullets": [
+        "Charity Run and STEM campaign activations",
+        "AI and innovation workshops for students",
+        "Sustainable kit and operations partnerships"
+      ]
+    },
+    "deck": {
+      "title": "Partnership Deck",
+      "description": "Access sponsorship benefits, activation models, and enterprise outcomes."
+    }
+  },
+  "teamPage": {
+    "title": "The Team",
+    "subtitle": "A focused group of engineers, designers, and operators executing at race pace."
+  },
+  "teamMembers": [
+    {
+      "id": "yahya-murad",
+      "name": "Yahya Murad",
+      "role": "Team Principal",
+      "achievements": [
+        "8 A* in IGCSE",
+        "1st in BSME Debate Middle East",
+        "iFlourish Scholarship Recipient",
+        "Highest Mark in World for Maths (200/200)",
+        "Top 10 Finalist Lancaster Leipzig Business",
+        "Directed debate instruction for 50+ students"
+      ],
+      "bio": "Leads race strategy, team direction, and performance standards across engineering and enterprise workstreams.",
+      "image": "/photos/team/yahya.jpg",
+      "imageSrc": "/photos/team/yahya-headshot.png"
+    },
+    {
+      "id": "adam-hussien",
+      "name": "Adam Hussien",
+      "role": "Head of Enterprise",
+      "achievements": [
+        "1M EGP Sales Generated",
+        "IYMC Finalist",
+        "Top 10 Lancaster Leipzig Business Competition",
+        "Adam Burfield Enterprise Award Finalist",
+        "7 A* / 2 A IGCSE",
+        "Top 20 De Montfort Accounting Competition"
+      ],
+      "bio": "Owns sponsorship architecture, partner communications, and growth campaigns tied to measurable outcomes.",
+      "image": "/photos/team/adam.jpg",
+      "imageSrc": "/photos/team/adam-headshot.png"
+    },
+    {
+      "id": "vihaann-goswami",
+      "name": "Vihaann Goswami",
+      "role": "Graphic Designer",
+      "achievements": [
+        "Branding graphics with 150k+ interactions",
+        "Largest UAE Interschool Robotics Winner",
+        "Full-stack React site with 100+ orders",
+        "2-3 years Python, AI, and Automation (Byju's)",
+        "7 A* IGCSE (Math, CS, Graphic Design)",
+        "Created Blender 3D thumbnails for gaming creators"
+      ],
+      "bio": "Builds visual identity systems, cinematic race media, and digital collateral for sponsor activations.",
+      "image": "/photos/team/vihaann.jpg",
+      "imageSrc": "/photos/team/vihaann-headshot.png"
+    },
+    {
+      "id": "sajjad-jahanzad",
+      "name": "Sajjad Jahanzad",
+      "role": "Head of Engineering",
+      "achievements": [
+        "Science Curricular Research on ORC Turbines",
+        "3rd Place Westford Business Challenge",
+        "FLL Participant Elite",
+        "Published Work from AI Genesis Hackathon",
+        "9 A* IGCSE",
+        "iPhysC Semi-Finalist (Ongoing)"
+      ],
+      "bio": "Directs CAD, validation flow, and production readiness from concept to track-legal race package.",
+      "image": "/photos/team/sajjad.jpg",
+      "imageSrc": "/photos/team/sajjad-headshot.png"
+    },
+    {
+      "id": "ahmed-lebdah",
+      "name": "Ahmed Lebdah",
+      "role": "Analytic Engineer",
+      "achievements": [
+        "2x UKMT Gold (Junior & Intermediate)",
+        "IYMC Finalist",
+        "Proficiency in CAD and CFD",
+        "7 A* IGCSE (Further Maths, Physics)",
+        "ChallengeMe Semi-Finalist",
+        "Adam Burfield Enterprise Award Finalist"
+      ],
+      "bio": "Runs computational analysis and evidence-led aero optimization to eliminate performance uncertainty.",
+      "image": "/photos/team/ahmed.jpg",
+      "imageSrc": "/photos/team/ahmed-headshot.png"
+    },
+    {
+      "id": "piyush-garg",
+      "name": "Piyush Garg",
+      "role": "Design Engineer",
+      "achievements": [
+        "International Robotics Competitor",
+        "Lead CAD Designer FTC",
+        "Innovative Hardware Experimenter",
+        "Electronics and Robotics Specialist",
+        "Fusion 360 Expert",
+        "GIC Hardware Designer"
+      ],
+      "bio": "Translates design intent into manufacturable geometry while balancing speed, stability, and compliance.",
+      "image": "/photos/team/piyush.jpg",
+      "imageSrc": "/photos/team/piyush-headshot.png"
+    }
+  ],
+  "sponsors": [
+    {
+      "name": "VMake",
+      "tier": "Champion",
+      "description": "Cinematic event and storytelling partner driving production-grade content quality.",
+      "logo": "/sponsors/vmake.svg"
+    },
+    {
+      "name": "Spicebox.AI",
+      "tier": "Turbo",
+      "description": "Innovation advisory partner translating AI ideas into practical implementations.",
+      "logo": "/sponsors/spicebox.svg"
+    },
+    {
+      "name": "Indiana Delights",
+      "tier": "Turbo",
+      "description": "Food and hospitality partner supporting campaigns and community events.",
+      "logo": "/sponsors/indiana.svg"
+    },
+    {
+      "name": "YetKey",
+      "tier": "Speed",
+      "description": "Sustainable apparel and performance support partner for team operations.",
+      "logo": "/sponsors/yetkey.svg"
+    }
+  ],
+  "engineeringPage": {
+    "title": "Engineering",
+    "subtitle": "From concept to launch, every iteration is measurable, testable, and race-focused.",
+    "timeline": [
+      {
+        "title": "CAD Sculpting",
+        "tool": "Autodesk Fusion 360",
+        "description": "Aerodynamic chassis geometry is shaped for minimum drag and stable centerline behavior.",
+        "outcome": "Geometry ready for simulation"
+      },
+      {
+        "title": "CFD Validation",
+        "tool": "Ansys CFD",
+        "description": "Pressure maps and streamline behavior guide parameter-level refinements.",
+        "outcome": "Quantified airflow improvements"
+      },
+      {
+        "title": "CNC Production",
+        "tool": "Lunyee 3018 Pro Ultra",
+        "description": "Final validated model is machined, finished, and prepped for race conditions.",
+        "outcome": "Competition-ready car body"
+      }
+    ],
+    "gallery": [
+      {
+        "id": "concept-alpha",
+        "title": "Concept Alpha",
+        "category": "Renders",
+        "image": "/photos/gallery/renders-1.jpg",
+        "mediaType": "render",
+        "mediaSrc": "/photos/gallery/engineering/concept-alpha-render.png",
+        "mediaAlt": "Concept Alpha render",
+        "caption": "Initial surface exploration focusing on minimizing frontal area and optimizing straight-line speed."
+      },
+      {
+        "id": "concept-beta",
+        "title": "Concept Beta",
+        "category": "Renders",
+        "image": "/photos/gallery/renders-2.jpg",
+        "mediaType": "render",
+        "mediaSrc": "/photos/gallery/engineering/concept-beta-render.png",
+        "mediaAlt": "Concept Beta render",
+        "caption": "Independent structural design prioritizing flow separation control and minimizing turbulent wake."
+      },
+      {
+        "id": "concept-gamma",
+        "title": "Concept Gamma",
+        "category": "Renders",
+        "image": "/photos/gallery/cfd-1.jpg",
+        "mediaType": "render",
+        "mediaSrc": "/photos/gallery/engineering/concept-gamma-render.png",
+        "mediaAlt": "Concept Gamma render",
+        "caption": "Foundational CAD model exploring weight reduction strategies within strict F1 in Schools regulations."
+      },
+      {
+        "id": "beta-simulation",
+        "title": "Beta Simulation",
+        "category": "CFD",
+        "image": "/photos/gallery/cfd-1.jpg",
+        "mediaType": "cfd",
+        "mediaSrc": "/photos/gallery/engineering/concept-beta-cfd.jpeg",
+        "mediaAlt": "Beta CFD simulation",
+        "caption": "Ansys simulation evaluating flow separation and wake size to validate our aerodynamic efficiency."
+      },
+      {
+        "id": "gamma-simulation",
+        "title": "Gamma Simulation",
+        "category": "CFD",
+        "image": "/photos/gallery/cfd-2.jpg",
+        "mediaType": "cfd",
+        "mediaSrc": "/photos/gallery/engineering/concept-gamma-cfd.jpeg",
+        "mediaAlt": "Gamma CFD simulation",
+        "caption": "Testing drag coefficients and pressure distribution to optimize aerodynamic track performance."
+      }
+    ]
+  },
+  "enterprisePage": {
+    "title": "Enterprise",
+    "subtitle": "A sponsor program engineered for visibility, trust, and measurable impact.",
+    "pitch": "Join the team that drives results. Our sponsors receive dedicated storytelling, campus activation, and a high-performance narrative built for brand growth.",
+    "tiers": [
+      {
+        "name": "Champion",
+        "minimumAed": "15,000+ AED",
+        "benefits": [
+          "Primary car branding",
+          "Lead content placement",
+          "Exclusive campaign integration"
+        ]
+      },
+      {
+        "name": "Nitro",
+        "minimumAed": "10,000+ AED",
+        "benefits": [
+          "Premium logo placement",
+          "Dedicated sponsor feature",
+          "Joint outreach co-branding"
+        ]
+      },
+      {
+        "name": "Turbo",
+        "minimumAed": "5,000+ AED",
+        "benefits": [
+          "Team asset logo placement",
+          "Social shoutout package",
+          "Event mention rights"
+        ]
+      },
+      {
+        "name": "Speed",
+        "minimumAed": "1,000+ AED",
+        "benefits": [
+          "Supporter listing",
+          "Digital appreciation post",
+          "Community campaign inclusion"
+        ]
+      }
+    ],
+    "stats": [
+      { "label": "Student Reach", "value": "6,000+" },
+      { "label": "LinkedIn Impressions", "value": "100k+" },
+      { "label": "Sustainable Ops", "value": "100%" },
+      { "label": "National Finals", "value": "UAE" }
+    ],
+    "gallery": [
+      {
+        "id": "community-activation",
+        "title": "Community Activation",
+        "category": "Events",
+        "tag": "events",
+        "image": "/photos/gallery/enterprise/international-day-racing-sim-event.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/international-day-racing-sim-event.jpeg",
+        "mediaAlt": "Community Activation",
+        "description": "Engaging our community and inspiring future engineers through interactive racing simulators at GFS Family First.",
+        "caption": "Engaging our community and inspiring future engineers through interactive racing simulators at GFS Family First."
+      },
+      {
+        "id": "professional-display",
+        "title": "Professional Display",
+        "category": "Events",
+        "tag": "events",
+        "image": "/photos/gallery/enterprise/international-day-backboards-event.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/international-day-backboards-event.jpeg",
+        "mediaAlt": "Professional Display",
+        "description": "Showcasing our brand identity, sponsor network, and engineering journey to over 3,000+ engaged event attendees.",
+        "caption": "Showcasing our brand identity, sponsor network, and engineering journey to over 3,000+ engaged event attendees."
+      },
+      {
+        "id": "branded-assets",
+        "title": "Branded Assets",
+        "category": "Events",
+        "tag": "events",
+        "image": "/photos/gallery/enterprise/international-day-car-keychains-event.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/international-day-car-keychains-event.jpeg",
+        "mediaAlt": "Branded Assets",
+        "description": "Distributing custom 3D-printed miniature F1 cars to maximize our team visibility and meaningful community connection.",
+        "caption": "Distributing custom 3D-printed miniature F1 cars to maximize our team visibility and meaningful community connection."
+      },
+      {
+        "id": "event-networking",
+        "title": "Event Networking",
+        "category": "Events",
+        "tag": "events",
+        "image": "/photos/gallery/enterprise/international-day-group-photo-event.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/international-day-group-photo-event.jpeg",
+        "mediaAlt": "Event Networking",
+        "description": "Representing our enterprise strategy and building real-world relationships at large-scale school exhibitions.",
+        "caption": "Representing our enterprise strategy and building real-world relationships at large-scale school exhibitions."
+      },
+      {
+        "id": "executive-summit",
+        "title": "Executive Summit",
+        "category": "Outreach",
+        "tag": "outreach",
+        "image": "/photos/gallery/enterprise/brandme-summit-outreach.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/brandme-summit-outreach.jpeg",
+        "mediaAlt": "Executive Summit",
+        "description": "Attending leading marketing panels to refine our enterprise strategy and expand our professional network.",
+        "caption": "Attending leading marketing panels to refine our enterprise strategy and expand our professional network."
+      },
+      {
+        "id": "corporate-collaboration",
+        "title": "Corporate Collaboration",
+        "category": "Outreach",
+        "tag": "outreach",
+        "image": "/photos/gallery/enterprise/marisha-spicebox-outreach.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/marisha-spicebox-outreach.jpeg",
+        "mediaAlt": "Corporate Collaboration",
+        "description": "Strategizing with Spicebox.AI to develop hands-on educational workshops focused on emerging technologies.",
+        "caption": "Strategizing with Spicebox.AI to develop hands-on educational workshops focused on emerging technologies."
+      },
+      {
+        "id": "co-branded-marketing",
+        "title": "Co-Branded Marketing",
+        "category": "Outreach",
+        "tag": "outreach",
+        "image": "/photos/gallery/enterprise/international-day-vmake-stickers-outreach.jpeg",
+        "mediaType": "background",
+        "mediaSrc": "/photos/gallery/enterprise/international-day-vmake-stickers-outreach.jpeg",
+        "mediaAlt": "Co-Branded Marketing",
+        "description": "Maximizing visibility and digital engagement through QR code activations and custom sponsor-branded merchandise.",
+        "caption": "Maximizing visibility and digital engagement through QR code activations and custom sponsor-branded merchandise."
+      }
+    ],
+    "outreach": {
+      "title": "Outreach and Impact",
+      "description": "Our outreach portfolio combines competitive engineering with accessible STEM learning.",
+      "items": [
+        "Charity run campaigns",
+        "Educational AI workshops",
+        "School-wide innovation demonstrations"
+      ]
+    },
+    "faqs": [
+      {
+        "question": "How fast can a sponsor activation go live?",
+        "answer": "Within one campaign cycle after alignment, we can launch integrated content and event visibility."
+      },
+      {
+        "question": "What does a partner receive beyond logo placement?",
+        "answer": "Narrative-rich media content, outreach integration, and performance-led positioning tied to our competition journey."
+      },
+      {
+        "question": "Can sponsorship include education initiatives?",
+        "answer": "Yes. We can co-design workshops and student engagement initiatives to align with your CSR priorities."
+      }
+    ]
+  },
+  "sponsorsPage": {
+    "title": "Sponsors",
+    "subtitle": "Our sponsors are part of the build, the race, and the story.",
+    "spotlightTitle": "Sponsor Spotlights",
+    "ctaTitle": "Ready to accelerate with Successors?",
+    "ctaDescription": "Connect with us to tailor a sponsorship package that aligns with your growth goals."
+  },
+  "contactPage": {
+    "title": "Contact",
+    "subtitle": "Tell us about your partnership, media, or collaboration goals.",
+    "intro": "Use the form to generate a prefilled email. No portals, no friction, direct contact only.",
+    "socialPrompt": "Prefer social channels? Reach out through our platforms while we finalize full media kits."
+  },
+  "buildBrief": {
+    "source": "Comprehensive Website Build Brief for Team Successors",
+    "missingInputCheck": [
+      "Instagram link could not be live-verified during briefing.",
+      "Gold HEX was sampled from the crown logo as #E5B80B.",
+      "Final media assets are pending and represented with placeholders."
+    ],
+    "brandVoice": [
+      "Ambitious yet grounded",
+      "Technically precise",
+      "Community focused",
+      "Grateful and trust-driven"
+    ],
+    "keyClaims": [
+      "F1 in Schools UAE National Finals focus",
+      "Access to 6,000+ students",
+      "100k+ LinkedIn impressions via network",
+      "Engineering stack: Fusion 360, Ansys CFD, Lunyee 3018 Pro Ultra",
+      "Sustainability partner operations at 100%"
+    ],
+    "sponsorshipTiers": [
+      "Champion (15k AED+)",
+      "Nitro (10k AED+)",
+      "Turbo (5k AED+)",
+      "Speed (1k AED+)"
+    ],
+    "copyDraft": {
+      "heroHeadline": "Inheriting the Legacy. Defining the Future.",
+      "heroSubheadline": "We are Successors. The GEMS Founders School F1 in Schools team driving innovation, ambition, and engineering excellence.",
+      "whatWeDo": [
+        "Design aerodynamic chassis in Fusion 360",
+        "Analyze airflow and drag in Ansys CFD",
+        "Manufacture with precision CNC machining",
+        "Market with enterprise-grade partner storytelling",
+        "Race for the national title"
+      ],
+      "sponsorPitch": "Our sponsors do not just get a logo on a car. They get a focused marketing and outreach arm connected to a high-performance story."
+    }
+  }
+}

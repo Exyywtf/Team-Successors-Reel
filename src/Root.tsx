@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import './imported-site/site/app/globals.css';
 import { Composition } from 'remotion';
 import { Reel } from './compositions/Reel';
 import { TOTAL_FRAMES, FPS } from './lib/timing';

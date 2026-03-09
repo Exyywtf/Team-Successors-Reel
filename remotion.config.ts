@@ -7,7 +7,18 @@
 
 import { Config } from "@remotion/cli/config";
 import { enableTailwind } from '@remotion/tailwind-v4';
+import path from 'path';
 
 Config.setVideoImageFormat("png");
 Config.setOverwriteOutput(true);
-Config.overrideWebpackConfig(enableTailwind);
+Config.overrideWebpackConfig((currentConfig) => {
+  const config = enableTailwind(currentConfig);
+  const projectRoot = process.cwd();
+  config.resolve ??= {};
+  config.resolve.alias = {
+    ...config.resolve.alias,
+    '@': path.resolve(projectRoot, 'src/imported-site/site'),
+    next: path.resolve(projectRoot, 'src/imported-site/site/runtime/next'),
+  };
+  return config;
+});

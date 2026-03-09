@@ -3,27 +3,25 @@ import {
   AbsoluteFill,
   Easing,
   Img,
+  interpolate,
+  spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
-  spring,
-  interpolate,
 } from 'remotion';
 import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
-import { heroSpring, glideSpring, softSpring } from '../lib/springs';
-
-// Scene duration: 180 frames (6.0s), global start: 242
-//
-// Timeline:
-//   f00–10   — scene fades in (cut from S02 fade-out)
-//   f10      — CFD image slams in full-bleed (scale 1.10→1.00)
-//   f20–48   — "Analyze." gold label + "ANSYS CFD" spring in, bottom-left
-//   f40–70   — "0.1mm" data pill slides from right
-//   f80–110  — CFD fades; Card 1 (Design) enters from left with 3D tilt
-//   f95–125  — Card 2 (Validate) enters from right
-//   f140–165 — "CAD → CFD → CNC" label fades in center
-//   f165–180 — fade to black
+import { glideSpring, heroSpring, softSpring } from '../lib/springs';
+import { ENGINEERING_INTRO_MODE } from '../lib/engineeringIntroConfig';
+import Card from '../imported-site/site/components/ui/Card';
+import ImageWithFallback from '../imported-site/site/components/ImageWithFallback';
+import {
+  TEAM_MEDIA_BACKGROUND_CLASS,
+  TEAM_MEDIA_FADE_STYLE,
+  TEAM_MEDIA_OVERLAY_SIZE_CLASS,
+} from '../imported-site/site/components/media/teamMediaStyles';
+import { siteContent } from '../imported-site/site/lib/content';
+import type { GalleryItem } from '../imported-site/site/types/content';
 
 const FADE_IN_END = 10;
 const CFD_ANALYZE_DELAY = 20;
@@ -33,9 +31,29 @@ const CFD_FADE_END = 100;
 const CARDS_PHASE_START = 82;
 const CARD1_DELAY = 84;
 const CARD2_DELAY = 100;
-const CHAIN_DELAY = 140;
 const FADE_OUT_START = 165;
 const SCENE_TOTAL = 180;
+
+const BETA_CARD_PHASE_START = 16;
+const BETA_CARD_PHASE_DURATION = 64;
+const BETA_CARD_MORPH_DURATION = 16;
+const BETA_CARD_PHASE_TWO_START = BETA_CARD_PHASE_START + BETA_CARD_PHASE_DURATION;
+const CHAIN_DELAY = BETA_CARD_PHASE_TWO_START + BETA_CARD_PHASE_DURATION;
+
+const getEngineeringGalleryItem = (id: string): GalleryItem => {
+  const item = siteContent.engineeringPage.gallery.find((entry) => entry.id === id);
+
+  if (!item) {
+    throw new Error(`Engineering gallery item not found: ${id}`);
+  }
+
+  return item;
+};
+
+const BETA_RENDER_CARD = getEngineeringGalleryItem('concept-beta');
+const BETA_CFD_CARD = getEngineeringGalleryItem('beta-simulation');
+const GAMMA_RENDER_CARD = getEngineeringGalleryItem('concept-gamma');
+const GAMMA_CFD_CARD = getEngineeringGalleryItem('gamma-simulation');
 
 const formatPrecisionTarget = (value: number) => {
   if (value >= 9.95) {
@@ -50,10 +68,17 @@ const formatPrecisionTarget = (value: number) => {
 };
 
 export const S03Engineering: React.FC = () => {
+  if (ENGINEERING_INTRO_MODE === 'cfd-background') {
+    return <EngineeringCfdBackgroundIntro />;
+  }
+
+  return <EngineeringBetaCardsIntro />;
+};
+
+const EngineeringCfdBackgroundIntro: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // ── Scene envelope ─────────────────────────────────────────────────────────
   const sceneIn = interpolate(frame, [0, FADE_IN_END], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -64,7 +89,6 @@ export const S03Engineering: React.FC = () => {
     extrapolateRight: 'clamp',
   });
 
-  // ── CFD image slam ──────────────────────────────────────────────────────────
   const cfdEntry = spring({
     frame: Math.max(0, frame - 10),
     fps,
@@ -72,63 +96,21 @@ export const S03Engineering: React.FC = () => {
     durationInFrames: 30,
   });
   const cfdScale = cfdEntry > 0.96 ? 1.02 : 1.09 - cfdEntry * 0.07;
-  // Slow ambient drift across the scene
   const cfdDriftX = interpolate(frame, [10, SCENE_TOTAL], [0, -16], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-
-  // CFD phase opacity — fades out as cards arrive
   const cfdOpacity = interpolate(frame, [CFD_FADE_START, CFD_FADE_END], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
 
-  // ── "Analyze." label — bottom-left ────────────────────────────────────────
-  const analyzeSpring = spring({
-    frame: Math.max(0, frame - CFD_ANALYZE_DELAY),
-    fps,
-    config: heroSpring,
-    durationInFrames: 30,
-  });
-  const analyzeY = analyzeSpring > 0.96 ? 0 : (1 - analyzeSpring) * 40;
-
-  // ── "ANSYS CFD Simulation" sub-label ──────────────────────────────────────
-  const cfdSubSpring = spring({
-    frame: Math.max(0, frame - (CFD_ANALYZE_DELAY + 10)),
-    fps,
-    config: softSpring,
-    durationInFrames: 25,
-  });
-
-  // ── Data pill ──────────────────────────────────────────────────────────────
-  const pillSpring = spring({
-    frame: Math.max(0, frame - PILL_DELAY),
-    fps,
-    config: glideSpring,
-    durationInFrames: 22,
-  });
-  const pillX = (1 - pillSpring) * 180;
-  const precisionCountProgress = interpolate(
-    frame,
-    [PILL_DELAY + 18, PILL_DELAY + 38],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: Easing.bezier(0.18, 0.94, 0.32, 1),
-    }
-  );
-  const precisionValue = 10 - 9.9 * precisionCountProgress;
-
-  // ── Cards phase opacity ────────────────────────────────────────────────────
   const cardsIn = interpolate(frame, [CARDS_PHASE_START, CARDS_PHASE_START + 14], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
     easing: (t) => t * t * (3 - 2 * t),
   });
 
-  // ── Card 1 (Design) — enters from left ────────────────────────────────────
   const card1Spring = spring({
     frame: Math.max(0, frame - CARD1_DELAY),
     fps,
@@ -139,7 +121,6 @@ export const S03Engineering: React.FC = () => {
   const card1Y = (1 - card1Spring) * 26;
   const card1Scale = 0.95 + card1Spring * 0.05;
 
-  // ── Card 2 (Validate) — enters from right ─────────────────────────────────
   const card2Spring = spring({
     frame: Math.max(0, frame - CARD2_DELAY),
     fps,
@@ -150,21 +131,9 @@ export const S03Engineering: React.FC = () => {
   const card2Y = (1 - card2Spring) * 24;
   const card2Scale = 0.95 + card2Spring * 0.05;
 
-  // ── "CAD → CFD → CNC" label ───────────────────────────────────────────────
-  const chainSpring = spring({
-    frame: Math.max(0, frame - CHAIN_DELAY),
-    fps,
-    config: softSpring,
-    durationInFrames: 25,
-  });
-
   return (
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden', opacity: sceneIn }}>
-
-      {/* ── CFD Phase ─────────────────────────────────────────────────────── */}
       <AbsoluteFill style={{ opacity: cfdOpacity }}>
-
-        {/* CFD hero image — full-bleed, slow drift */}
         <AbsoluteFill
           style={{
             transform: `scale(${cfdScale}) translateX(${cfdDriftX}px)`,
@@ -177,7 +146,6 @@ export const S03Engineering: React.FC = () => {
           />
         </AbsoluteFill>
 
-        {/* Bottom gradient — pulls focus to labels without hiding CFD detail */}
         <AbsoluteFill
           style={{
             transform: `scale(${cfdScale + 0.018}) translateX(${cfdDriftX * 0.7}px)`,
@@ -204,100 +172,11 @@ export const S03Engineering: React.FC = () => {
           }}
         />
 
-        {/* ── "Analyze." + ANSYS label ── */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 60,
-            bottom: 240,
-            transform: `translateY(${analyzeY}px)`,
-            opacity: analyzeSpring > 0.96 ? 1 : analyzeSpring,
-          }}
-        >
-          <div
-            style={{
-              fontFamily: orbitron,
-              fontSize: 72,
-              fontWeight: 900,
-              color: theme.colors.gold,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              lineHeight: 1,
-              textShadow: `0 0 32px rgba(229,184,11,0.65), 0 0 70px rgba(229,184,11,0.22)`,
-            }}
-          >
-            Analyze.
-          </div>
-          <div
-            style={{
-              fontFamily: montserrat,
-              fontSize: 26,
-            fontWeight: 600,
-            color: theme.colors.textDim,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            marginTop: 14,
-            marginLeft: 4,
-            opacity: cfdSubSpring,
-          }}
-        >
-            ANSYS CFD Simulation
-          </div>
-        </div>
-
-        {/* ── "0.1mm" data pill — bottom-right ── */}
-        <div
-          style={{
-            position: 'absolute',
-            right: 60,
-            bottom: 240,
-            transform: `translateX(${pillX}px)`,
-            opacity: pillSpring,
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(229,184,11,0.09)',
-              border: `1px solid rgba(229,184,11,0.38)`,
-              borderRadius: 12,
-              padding: '22px 32px',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: orbitron,
-                fontSize: 14,
-                fontWeight: 700,
-                color: theme.colors.gold,
-                letterSpacing: '0.24em',
-                textTransform: 'uppercase',
-              }}
-            >
-              Precision Target
-            </div>
-            <div
-              style={{
-                fontFamily: orbitron,
-                fontSize: 56,
-                fontWeight: 900,
-                color: theme.colors.white,
-                letterSpacing: '-0.02em',
-                marginTop: 8,
-                lineHeight: 1,
-                textShadow: `0 0 30px rgba(255,255,255,0.20)`,
-              }}
-            >
-              {formatPrecisionTarget(precisionValue)}
-            </div>
-          </div>
-        </div>
-
+        <AnalyzeOverlay />
+        <PrecisionTargetPill />
       </AbsoluteFill>
 
-      {/* ── Cards Phase ───────────────────────────────────────────────────── */}
       <AbsoluteFill style={{ opacity: cardsIn }}>
-
-        {/* Subtle atmosphere glow for cards phase */}
         <AbsoluteFill
           style={{
             background:
@@ -305,7 +184,6 @@ export const S03Engineering: React.FC = () => {
           }}
         />
 
-        {/* ── Card 1: Design (alpha render) ── */}
         <div
           style={{
             position: 'absolute',
@@ -316,7 +194,7 @@ export const S03Engineering: React.FC = () => {
             opacity: card1Spring,
           }}
         >
-          <EngineeringCard
+          <LegacyEngineeringCard
             imageSrc={staticFile('assets/concept-alpha-render.png')}
             stageLabel="01 / Design"
             title="Design"
@@ -326,7 +204,6 @@ export const S03Engineering: React.FC = () => {
           />
         </div>
 
-        {/* ── Card 2: Validate (CFD) ── */}
         <div
           style={{
             position: 'absolute',
@@ -337,7 +214,7 @@ export const S03Engineering: React.FC = () => {
             opacity: card2Spring,
           }}
         >
-          <EngineeringCard
+          <LegacyEngineeringCard
             imageSrc={staticFile('assets/concept-beta-cfd.jpeg')}
             stageLabel="02 / Validate"
             title="Validate"
@@ -347,35 +224,9 @@ export const S03Engineering: React.FC = () => {
           />
         </div>
 
-        {/* ── "CAD · CFD · CNC" label — sits just below the cards ── */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 640,
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-            opacity: chainSpring > 0.96 ? 1 : chainSpring,
-            transform: `translateY(${chainSpring > 0.96 ? 0 : (1 - chainSpring) * 18}px)`,
-          }}
-        >
-          <div
-            style={{
-              fontFamily: orbitron,
-              fontSize: 28,
-              fontWeight: 700,
-              color: 'rgba(255,255,255,0.55)',
-              letterSpacing: '0.24em',
-              textTransform: 'uppercase',
-            }}
-          >
-            CAD &nbsp;·&nbsp; CFD &nbsp;·&nbsp; CNC
-          </div>
-        </div>
-
+        <EngineeringChainLabel />
       </AbsoluteFill>
 
-      {/* Fade to black */}
       <AbsoluteFill
         style={{
           background: theme.colors.bg,
@@ -387,9 +238,356 @@ export const S03Engineering: React.FC = () => {
   );
 };
 
-// ── Internal card component — real website .card-pro styling ──────────────
+const EngineeringBetaCardsIntro: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
 
-interface EngineeringCardProps {
+  const sceneIn = interpolate(frame, [0, FADE_IN_END], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: (t) => t * t * (3 - 2 * t),
+  });
+  const fadeToBlack = interpolate(frame, [FADE_OUT_START, SCENE_TOTAL], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
+  const phaseOneBlendOut = interpolate(
+    frame,
+    [BETA_CARD_PHASE_TWO_START, BETA_CARD_PHASE_TWO_START + BETA_CARD_MORPH_DURATION],
+    [1, 0],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.inOut(Easing.cubic),
+    },
+  );
+  const phaseTwoBlendIn = interpolate(
+    frame,
+    [BETA_CARD_PHASE_TWO_START, BETA_CARD_PHASE_TWO_START + BETA_CARD_MORPH_DURATION],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.inOut(Easing.cubic),
+    },
+  );
+
+  const betaLeftSpring = spring({
+    frame: Math.max(0, frame - BETA_CARD_PHASE_START),
+    fps,
+    config: glideSpring,
+    durationInFrames: 30,
+  });
+  const betaRightSpring = spring({
+    frame: Math.max(0, frame - (BETA_CARD_PHASE_START + 8)),
+    fps,
+    config: glideSpring,
+    durationInFrames: 30,
+  });
+  const gammaLeftSpring = spring({
+    frame: Math.max(0, frame - BETA_CARD_PHASE_TWO_START),
+    fps,
+    config: glideSpring,
+    durationInFrames: 30,
+  });
+  const gammaRightSpring = spring({
+    frame: Math.max(0, frame - (BETA_CARD_PHASE_TWO_START + 8)),
+    fps,
+    config: glideSpring,
+    durationInFrames: 30,
+  });
+
+  const betaLeftX = (1 - betaLeftSpring) * -180 - (1 - phaseOneBlendOut) * 24;
+  const betaRightX = (1 - betaRightSpring) * 180 + (1 - phaseOneBlendOut) * 24;
+  const gammaLeftX = (1 - gammaLeftSpring) * -90;
+  const gammaRightX = (1 - gammaRightSpring) * 90;
+
+  const betaLeftY = (1 - betaLeftSpring) * 22;
+  const betaRightY = (1 - betaRightSpring) * 20;
+  const gammaLeftY = (1 - gammaLeftSpring) * 16;
+  const gammaRightY = (1 - gammaRightSpring) * 14;
+
+  const betaLeftOpacity = betaLeftSpring * phaseOneBlendOut;
+  const betaRightOpacity = betaRightSpring * phaseOneBlendOut;
+  const gammaLeftOpacity = gammaLeftSpring * phaseTwoBlendIn;
+  const gammaRightOpacity = gammaRightSpring * phaseTwoBlendIn;
+
+  const betaLeftScale = 0.965 + betaLeftSpring * 0.035 + (1 - phaseOneBlendOut) * 0.02;
+  const betaRightScale = 0.965 + betaRightSpring * 0.035 + (1 - phaseOneBlendOut) * 0.02;
+  const gammaLeftScale = 0.98 + gammaLeftSpring * 0.02;
+  const gammaRightScale = 0.98 + gammaRightSpring * 0.02;
+
+  const betaPhaseBlur = interpolate(phaseOneBlendOut, [0, 1], [8, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const gammaPhaseBlur = interpolate(phaseTwoBlendIn, [0, 1], [8, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
+  return (
+    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden', opacity: sceneIn }}>
+      <AbsoluteFill
+        style={{
+          background:
+            'radial-gradient(ellipse 80% 56% at 50% 48%, rgba(58,12,163,0.24) 0%, rgba(20,10,32,0.22) 34%, rgba(5,5,5,0.96) 78%)',
+        }}
+      />
+      <AbsoluteFill
+        style={{
+          background:
+            'radial-gradient(ellipse 56% 34% at 50% 42%, rgba(131,56,236,0.18) 0%, transparent 74%)',
+          filter: 'blur(72px)',
+          opacity: 0.9,
+        }}
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 24,
+          top: '50%',
+          width: 488,
+          transform: `translateY(calc(-54% + ${betaLeftY}px)) translateX(${betaLeftX}px) scale(${betaLeftScale})`,
+          opacity: betaLeftOpacity,
+          filter: `blur(${betaPhaseBlur}px)`,
+        }}
+      >
+        <EngineeringGalleryCard item={BETA_RENDER_CARD} tiltDeg={3} />
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 24,
+          top: '50%',
+          width: 488,
+          transform: `translateY(calc(-46% + ${betaRightY}px)) translateX(${betaRightX}px) scale(${betaRightScale})`,
+          opacity: betaRightOpacity,
+          filter: `blur(${betaPhaseBlur}px)`,
+        }}
+      >
+        <EngineeringGalleryCard item={BETA_CFD_CARD} tiltDeg={-3} />
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 24,
+          top: '50%',
+          width: 488,
+          transform: `translateY(calc(-54% + ${gammaLeftY}px)) translateX(${gammaLeftX}px) scale(${gammaLeftScale})`,
+          opacity: gammaLeftOpacity,
+          filter: `blur(${gammaPhaseBlur}px)`,
+        }}
+      >
+        <EngineeringGalleryCard item={GAMMA_RENDER_CARD} tiltDeg={3} />
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 24,
+          top: '50%',
+          width: 488,
+          transform: `translateY(calc(-46% + ${gammaRightY}px)) translateX(${gammaRightX}px) scale(${gammaRightScale})`,
+          opacity: gammaRightOpacity,
+          filter: `blur(${gammaPhaseBlur}px)`,
+        }}
+      >
+        <EngineeringGalleryCard item={GAMMA_CFD_CARD} tiltDeg={-3} />
+      </div>
+
+      <AnalyzeOverlay />
+      <PrecisionTargetPill />
+      <EngineeringChainLabel />
+
+      <AbsoluteFill
+        style={{
+          background: theme.colors.bg,
+          opacity: fadeToBlack,
+          pointerEvents: 'none',
+        }}
+      />
+    </AbsoluteFill>
+  );
+};
+
+const AnalyzeOverlay: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const analyzeSpring = spring({
+    frame: Math.max(0, frame - CFD_ANALYZE_DELAY),
+    fps,
+    config: heroSpring,
+    durationInFrames: 30,
+  });
+  const analyzeY = analyzeSpring > 0.96 ? 0 : (1 - analyzeSpring) * 40;
+  const cfdSubSpring = spring({
+    frame: Math.max(0, frame - (CFD_ANALYZE_DELAY + 10)),
+    fps,
+    config: softSpring,
+    durationInFrames: 25,
+  });
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 60,
+        bottom: 240,
+        transform: `translateY(${analyzeY}px)`,
+        opacity: analyzeSpring > 0.96 ? 1 : analyzeSpring,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: orbitron,
+          fontSize: 72,
+          fontWeight: 900,
+          color: theme.colors.gold,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          lineHeight: 1,
+          textShadow: '0 0 32px rgba(229,184,11,0.65), 0 0 70px rgba(229,184,11,0.22)',
+        }}
+      >
+        Analyze.
+      </div>
+      <div
+        style={{
+          fontFamily: montserrat,
+          fontSize: 26,
+          fontWeight: 600,
+          color: theme.colors.textDim,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          marginTop: 14,
+          marginLeft: 4,
+          opacity: cfdSubSpring,
+        }}
+      >
+        ANSYS CFD Simulation
+      </div>
+    </div>
+  );
+};
+
+const PrecisionTargetPill: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const pillSpring = spring({
+    frame: Math.max(0, frame - PILL_DELAY),
+    fps,
+    config: glideSpring,
+    durationInFrames: 22,
+  });
+  const pillX = (1 - pillSpring) * 180;
+  const precisionCountProgress = interpolate(
+    frame,
+    [PILL_DELAY + 18, PILL_DELAY + 38],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.bezier(0.18, 0.94, 0.32, 1),
+    },
+  );
+  const precisionValue = 10 - 9.9 * precisionCountProgress;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        right: 60,
+        bottom: 240,
+        transform: `translateX(${pillX}px)`,
+        opacity: pillSpring,
+      }}
+    >
+      <div
+        style={{
+          background: 'rgba(229,184,11,0.09)',
+          border: '1px solid rgba(229,184,11,0.38)',
+          borderRadius: 12,
+          padding: '22px 32px',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: orbitron,
+            fontSize: 14,
+            fontWeight: 700,
+            color: theme.colors.gold,
+            letterSpacing: '0.24em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Precision Target
+        </div>
+        <div
+          style={{
+            fontFamily: orbitron,
+            fontSize: 56,
+            fontWeight: 900,
+            color: theme.colors.white,
+            letterSpacing: '-0.02em',
+            marginTop: 8,
+            lineHeight: 1,
+            textShadow: '0 0 30px rgba(255,255,255,0.20)',
+          }}
+        >
+          {formatPrecisionTarget(precisionValue)}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EngineeringChainLabel: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const chainSpring = spring({
+    frame: Math.max(0, frame - CHAIN_DELAY),
+    fps,
+    config: softSpring,
+    durationInFrames: 25,
+  });
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 640,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        opacity: chainSpring > 0.96 ? 1 : chainSpring,
+        transform: `translateY(${chainSpring > 0.96 ? 0 : (1 - chainSpring) * 18}px)`,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: orbitron,
+          fontSize: 28,
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.55)',
+          letterSpacing: '0.24em',
+          textTransform: 'uppercase',
+        }}
+      >
+        CAD · CFD · CNC
+      </div>
+    </div>
+  );
+};
+
+interface LegacyEngineeringCardProps {
   imageSrc: string;
   stageLabel: string;
   title: string;
@@ -398,7 +596,7 @@ interface EngineeringCardProps {
   imageHeight: number;
 }
 
-const EngineeringCard: React.FC<EngineeringCardProps> = ({
+const LegacyEngineeringCard: React.FC<LegacyEngineeringCardProps> = ({
   imageSrc,
   stageLabel,
   title,
@@ -408,31 +606,37 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
 }) => (
   <div
     style={{
-      // Real site: perspective(900px) rotateY on hover — keep subtle for reel
       transform: `perspective(1200px) rotateY(${tiltDeg}deg)`,
-      // Real site .card-pro: border-radius: 24px
       borderRadius: 24,
       overflow: 'hidden',
-      // Real site: 1px solid rgba(240,238,245,0.08)
       border: '1px solid rgba(240,238,245,0.12)',
-      // Real site: --obsidian-card-fill gradient
       background: 'linear-gradient(165deg, rgba(10,10,14,0.95) 0%, rgba(8,8,12,0.90) 56%, rgba(58,12,163,0.28) 100%)',
-      // Real site: 0 10px 28px rgba(0,0,0,0.4), 0 0 80px rgba(131,56,236,0.15)
       boxShadow: '0 34px 92px rgba(0,0,0,0.68), 0 0 120px rgba(131,56,236,0.24), 0 0 0 1px rgba(255,255,255,0.04) inset',
       position: 'relative',
     }}
   >
-    {/* Tech-bracket corners — real site .tech-brackets decoration */}
-    <div style={{
-      position: 'absolute', top: 10, left: 10, width: 14, height: 14,
-      borderTop: '1.5px solid rgba(229,184,11,0.30)',
-      borderLeft: '1.5px solid rgba(229,184,11,0.30)',
-    }} />
-    <div style={{
-      position: 'absolute', bottom: 10, right: 10, width: 14, height: 14,
-      borderBottom: '1.5px solid rgba(229,184,11,0.30)',
-      borderRight: '1.5px solid rgba(229,184,11,0.30)',
-    }} />
+    <div
+      style={{
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        width: 14,
+        height: 14,
+        borderTop: '1.5px solid rgba(229,184,11,0.30)',
+        borderLeft: '1.5px solid rgba(229,184,11,0.30)',
+      }}
+    />
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 10,
+        right: 10,
+        width: 14,
+        height: 14,
+        borderBottom: '1.5px solid rgba(229,184,11,0.30)',
+        borderRight: '1.5px solid rgba(229,184,11,0.30)',
+      }}
+    />
     <div
       style={{
         position: 'absolute',
@@ -442,24 +646,21 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
       }}
     />
 
-    {/* Image section */}
     <div style={{ height: imageHeight, overflow: 'hidden', position: 'relative' }}>
       <Img
         src={imageSrc}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
-      {/* Real site cards use gradient overlay from transparent → card bg */}
       <div
         style={{
-          position: 'absolute', inset: 0,
+          position: 'absolute',
+          inset: 0,
           background: 'linear-gradient(180deg, transparent 45%, rgba(8,8,12,0.90) 100%)',
         }}
       />
     </div>
 
-    {/* Card content — real site card-pad-default: 24px */}
     <div style={{ padding: '20px 24px 28px' }}>
-      {/* Stage badge — real site .type-label with pill treatment */}
       <div
         style={{
           display: 'inline-block',
@@ -478,7 +679,6 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
       >
         {stageLabel}
       </div>
-      {/* Title — real site .type-title */}
       <div
         style={{
           fontFamily: orbitron,
@@ -486,12 +686,11 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
           fontWeight: 900,
           color: theme.colors.white,
           letterSpacing: '-0.01em',
-          lineHeight: 1.0,
+          lineHeight: 1,
         }}
       >
         {title}
       </div>
-      {/* Description — real site .copy-sm muted */}
       <div
         style={{
           fontFamily: montserrat,
@@ -508,3 +707,80 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
     </div>
   </div>
 );
+
+const EngineeringGalleryCard: React.FC<{
+  item: GalleryItem;
+  tiltDeg: number;
+}> = ({ item, tiltDeg }) => {
+  const usesEngineeringMedia = Boolean(item.mediaType && item.mediaSrc);
+  const isRenderMedia = usesEngineeringMedia && item.mediaType === 'render';
+  const isCfdMedia = usesEngineeringMedia && item.mediaType === 'cfd';
+  const isBackgroundMedia = usesEngineeringMedia && item.mediaType === 'background';
+
+  return (
+    <div style={{ transform: `perspective(1200px) rotateY(${tiltDeg}deg)` }}>
+      <Card className="overflow-hidden" style={{ boxShadow: '0 34px 92px rgba(0,0,0,0.68), 0 0 120px rgba(131,56,236,0.24)' }}>
+        <div
+          className="relative w-full overflow-hidden"
+          data-engineering-media-wrapper={usesEngineeringMedia ? '1' : undefined}
+          style={{ height: 300 }}
+        >
+          {isRenderMedia ? (
+            <>
+              <div
+                aria-hidden="true"
+                className={TEAM_MEDIA_BACKGROUND_CLASS}
+                style={TEAM_MEDIA_FADE_STYLE}
+              />
+              <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+                <ImageWithFallback
+                  src={item.mediaSrc ?? item.image}
+                  alt={item.mediaAlt ?? item.title}
+                  width={900}
+                  height={620}
+                  className={TEAM_MEDIA_OVERLAY_SIZE_CLASS}
+                />
+              </div>
+            </>
+          ) : isCfdMedia || isBackgroundMedia ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 overflow-hidden"
+              style={TEAM_MEDIA_FADE_STYLE}
+            >
+              <ImageWithFallback
+                src={item.mediaSrc ?? item.image}
+                alt={item.mediaAlt ?? item.title}
+                width={900}
+                height={620}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <>
+              <ImageWithFallback
+                src={item.image}
+                alt={item.title}
+                width={900}
+                height={620}
+                className="h-full w-full object-cover"
+              />
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(58, 12, 163, 0) 20%, rgba(10, 10, 14, 0.52) 66%, rgba(5, 5, 5, 0.82) 100%)',
+                }}
+              />
+            </>
+          )}
+        </div>
+        <div className="card-pad-compact" style={{ padding: '20px 24px 28px' }}>
+          <p className="tier-chip mb-3 w-fit">{item.category}</p>
+          <h3 className="font-heading text-lg">{item.title}</h3>
+          <p className="mt-2 text-sm muted-copy">{item.caption}</p>
+        </div>
+      </Card>
+    </div>
+  );
+};

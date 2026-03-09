@@ -5,11 +5,18 @@
     "jsx": "react-jsx",
     "strict": true,
     "noEmit": true,
-    "lib": ["es2015"],
+    "lib": ["es2015", "dom", "dom.iterable"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/imported-site/site/*"],
+      "next": ["src/imported-site/site/runtime/next/index.ts"],
+      "next/*": ["src/imported-site/site/runtime/next/*"]
+    }
   },
   "exclude": ["remotion.config.ts"]
 }

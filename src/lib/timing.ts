@@ -16,10 +16,10 @@ export const FPS = 30;
  */
 export const SCENE_DURATIONS = {
   S01: 104,   // URL intro
-  S02: 120,  // Desktop quick-glance
+  S02: 278,  // Desktop quick-glance
   S03: 156,  // Hero reveal
   S04: 72,   // Timeline
-  S05: 120,  // Enterprise 2.5D
+  S05: 172,  // Enterprise 2.5D
   S06: 84,   // Metrics
   S07: 120,  // Engineering 2.5D
   S08: 180,  // Engineering deep-dive
@@ -37,8 +37,8 @@ export const TRANSITION_DURATIONS = {
   T08: 14,   // S08 → S09
 } as const;
 
-// Total = sum(durations) - sum(transitions) = 1064 - 132 = 932 frames = 31.07s
-export const TOTAL_FRAMES = 932;
+// Total = sum(durations) - sum(transitions) = 1274 - 132 = 1142 frames = 38.07s
+export const TOTAL_FRAMES = 1142;
 
 export const dur = (scene: keyof typeof SCENE_DURATIONS) =>
   SCENE_DURATIONS[scene];
