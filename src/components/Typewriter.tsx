@@ -90,7 +90,6 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
           marginLeft: '2px',
           verticalAlign: 'text-bottom',
           opacity: cursorVisible ? 1 : 0,
-          transition: 'none',
         }}
       />
     </span>

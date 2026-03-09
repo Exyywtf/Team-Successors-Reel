@@ -111,6 +111,8 @@ export const S03Engineering: React.FC = () => {
     durationInFrames: 32,
   });
   const card1X = (1 - card1Spring) * -260;
+  const card1Y = (1 - card1Spring) * 38;
+  const card1Scale = 0.92 + card1Spring * 0.08;
 
   // ── Card 2 (Validate) — enters from right ─────────────────────────────────
   const card2Spring = spring({
@@ -120,6 +122,8 @@ export const S03Engineering: React.FC = () => {
     durationInFrames: 32,
   });
   const card2X = (1 - card2Spring) * 260;
+  const card2Y = (1 - card2Spring) * 34;
+  const card2Scale = 0.92 + card2Spring * 0.08;
 
   // ── "CAD → CFD → CNC" label ───────────────────────────────────────────────
   const chainSpring = spring({
@@ -176,10 +180,10 @@ export const S03Engineering: React.FC = () => {
           <div
             style={{
               fontFamily: orbitron,
-              fontSize: 58,
+              fontSize: 72,
               fontWeight: 900,
               color: theme.colors.gold,
-              letterSpacing: '0.08em',
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
               lineHeight: 1,
               textShadow: `0 0 32px rgba(229,184,11,0.65), 0 0 70px rgba(229,184,11,0.22)`,
@@ -190,12 +194,12 @@ export const S03Engineering: React.FC = () => {
           <div
             style={{
               fontFamily: montserrat,
-              fontSize: 21,
+              fontSize: 26,
               fontWeight: 600,
               color: theme.colors.textDim,
-              letterSpacing: '0.20em',
+              letterSpacing: '0.18em',
               textTransform: 'uppercase',
-              marginTop: 12,
+              marginTop: 14,
               opacity: cfdSubSpring,
             }}
           >
@@ -217,14 +221,14 @@ export const S03Engineering: React.FC = () => {
             style={{
               background: 'rgba(229,184,11,0.09)',
               border: `1px solid rgba(229,184,11,0.38)`,
-              borderRadius: 10,
-              padding: '16px 24px',
+              borderRadius: 12,
+              padding: '22px 32px',
             }}
           >
             <div
               style={{
                 fontFamily: orbitron,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: 700,
                 color: theme.colors.gold,
                 letterSpacing: '0.24em',
@@ -236,11 +240,11 @@ export const S03Engineering: React.FC = () => {
             <div
               style={{
                 fontFamily: orbitron,
-                fontSize: 40,
+                fontSize: 56,
                 fontWeight: 900,
                 color: theme.colors.white,
                 letterSpacing: '-0.02em',
-                marginTop: 6,
+                marginTop: 8,
                 lineHeight: 1,
                 textShadow: `0 0 30px rgba(255,255,255,0.20)`,
               }}
@@ -270,17 +274,17 @@ export const S03Engineering: React.FC = () => {
             left: 24,
             top: '50%',
             width: 488,
-            transform: `translateY(-54%) translateX(${card1X}px)`,
+            transform: `translateY(calc(-54% + ${card1Y}px)) translateX(${card1X}px) scale(${card1Scale})`,
             opacity: card1Spring,
           }}
         >
           <EngineeringCard
             imageSrc={staticFile('assets/concept-alpha-render.png')}
+            stageLabel="01 / Design"
             title="Design"
-            subtitle="Fusion 360 · CAD"
-            accentColor={theme.colors.purpleSoft}
-            tiltDeg={5}
-            imageHeight={340}
+            subtitle="Fusion 360 CAD — precision geometry built for real-world manufacturing."
+            tiltDeg={3}
+            imageHeight={320}
           />
         </div>
 
@@ -291,25 +295,25 @@ export const S03Engineering: React.FC = () => {
             right: 24,
             top: '50%',
             width: 488,
-            transform: `translateY(-46%) translateX(${card2X}px)`,
+            transform: `translateY(calc(-46% + ${card2Y}px)) translateX(${card2X}px) scale(${card2Scale})`,
             opacity: card2Spring,
           }}
         >
           <EngineeringCard
             imageSrc={staticFile('assets/concept-beta-cfd.jpeg')}
+            stageLabel="02 / Validate"
             title="Validate"
-            subtitle="ANSYS · CFD"
-            accentColor={theme.colors.gold}
-            tiltDeg={-5}
-            imageHeight={340}
+            subtitle="ANSYS CFD simulation — aerodynamic precision at 0.1mm tolerance."
+            tiltDeg={-3}
+            imageHeight={320}
           />
         </div>
 
-        {/* ── "CAD → CFD → CNC" label ── */}
+        {/* ── "CAD · CFD · CNC" label — sits just below the cards ── */}
         <div
           style={{
             position: 'absolute',
-            bottom: 130,
+            bottom: 640,
             left: 0,
             right: 0,
             textAlign: 'center',
@@ -320,10 +324,10 @@ export const S03Engineering: React.FC = () => {
           <div
             style={{
               fontFamily: orbitron,
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: 700,
-              color: theme.colors.muted,
-              letterSpacing: '0.22em',
+              color: 'rgba(255,255,255,0.55)',
+              letterSpacing: '0.24em',
               textTransform: 'uppercase',
             }}
           >
@@ -345,68 +349,116 @@ export const S03Engineering: React.FC = () => {
   );
 };
 
-// ── Internal card component ────────────────────────────────────────────────
+// ── Internal card component — real website .card-pro styling ──────────────
 
 interface EngineeringCardProps {
   imageSrc: string;
+  stageLabel: string;
   title: string;
   subtitle: string;
-  accentColor: string;
   tiltDeg: number;
   imageHeight: number;
 }
 
 const EngineeringCard: React.FC<EngineeringCardProps> = ({
   imageSrc,
+  stageLabel,
   title,
   subtitle,
-  accentColor,
   tiltDeg,
   imageHeight,
 }) => (
   <div
     style={{
-      transform: `perspective(900px) rotateY(${tiltDeg}deg)`,
-      borderRadius: 14,
+      // Real site: perspective(900px) rotateY on hover — keep subtle for reel
+      transform: `perspective(1200px) rotateY(${tiltDeg}deg)`,
+      // Real site .card-pro: border-radius: 24px
+      borderRadius: 24,
       overflow: 'hidden',
-      border: `1px solid rgba(255,255,255,0.08)`,
-      background: 'rgba(18,18,18,0.92)',
-      boxShadow: `0 32px 90px rgba(0,0,0,0.65), 0 0 0 1px ${accentColor}1A`,
+      // Real site: 1px solid rgba(240,238,245,0.08)
+      border: '1px solid rgba(240,238,245,0.12)',
+      // Real site: --obsidian-card-fill gradient
+      background: 'linear-gradient(165deg, rgba(10,10,14,0.95) 0%, rgba(8,8,12,0.90) 56%, rgba(58,12,163,0.28) 100%)',
+      // Real site: 0 10px 28px rgba(0,0,0,0.4), 0 0 80px rgba(131,56,236,0.15)
+      boxShadow: '0 34px 92px rgba(0,0,0,0.68), 0 0 120px rgba(131,56,236,0.24), 0 0 0 1px rgba(255,255,255,0.04) inset',
+      position: 'relative',
     }}
   >
+    {/* Tech-bracket corners — real site .tech-brackets decoration */}
+    <div style={{
+      position: 'absolute', top: 10, left: 10, width: 14, height: 14,
+      borderTop: '1.5px solid rgba(229,184,11,0.30)',
+      borderLeft: '1.5px solid rgba(229,184,11,0.30)',
+    }} />
+    <div style={{
+      position: 'absolute', bottom: 10, right: 10, width: 14, height: 14,
+      borderBottom: '1.5px solid rgba(229,184,11,0.30)',
+      borderRight: '1.5px solid rgba(229,184,11,0.30)',
+    }} />
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        background: 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, transparent 34%)',
+      }}
+    />
+
+    {/* Image section */}
     <div style={{ height: imageHeight, overflow: 'hidden', position: 'relative' }}>
       <Img
         src={imageSrc}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
+      {/* Real site cards use gradient overlay from transparent → card bg */}
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(180deg, transparent 50%, rgba(18,18,18,0.88) 100%)',
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, transparent 45%, rgba(8,8,12,0.90) 100%)',
         }}
       />
     </div>
-    <div style={{ padding: '20px 24px 26px' }}>
+
+    {/* Card content — real site card-pad-default: 24px */}
+    <div style={{ padding: '20px 24px 28px' }}>
+      {/* Stage/eyebrow label — real site .type-label */}
       <div
         style={{
           fontFamily: orbitron,
-          fontSize: 30,
+          fontSize: 10,
+          fontWeight: 700,
+          color: theme.colors.gold,
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          marginBottom: 10,
+          opacity: 0.85,
+        }}
+      >
+        {stageLabel}
+      </div>
+      {/* Title — real site .type-title */}
+      <div
+        style={{
+          fontFamily: orbitron,
+          fontSize: 32,
           fontWeight: 900,
           color: theme.colors.white,
           letterSpacing: '-0.01em',
+          lineHeight: 1.0,
         }}
       >
         {title}
       </div>
+      {/* Description — real site .copy-sm muted */}
       <div
         style={{
           fontFamily: montserrat,
-          fontSize: 16,
-          color: accentColor,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          marginTop: 8,
+          fontSize: 14,
+          fontWeight: 500,
+          color: theme.colors.muted,
+          letterSpacing: '0.04em',
+          marginTop: 10,
+          lineHeight: 1.55,
         }}
       >
         {subtitle}

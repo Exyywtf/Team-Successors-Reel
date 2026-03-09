@@ -14,7 +14,7 @@ import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { heroSpring, softSpring } from '../lib/springs';
 
-// Scene duration: 78 frames (2.6s), global start: 582
+// Scene duration: 96 frames (3.2s), global start: 596
 //
 // Timeline:
 //   f00–12  — scene fades in
@@ -22,15 +22,15 @@ import { heroSpring, softSpring } from '../lib/springs';
 //   f22     — eyebrow + CTA heading animate in
 //   f36     — URL fades in
 //   f48     — sponsor logos stagger in
-//   f66–78  — fade to black
+//   f84–96  — fade to black
 
 const SCENE_FADE_IN = 12;
 const LOGO_DELAY = 6;
 const CTA_DELAY = 22;
 const URL_DELAY = 36;
-const SPONSORS_DELAY = 48;
-const FADE_TO_BLACK_START = 66;
-const SCENE_TOTAL = 78;
+const SPONSORS_DELAY = 46;
+const FADE_TO_BLACK_START = 84;
+const SCENE_TOTAL = 96;
 
 // Sponsor config — colored, no invert filter
 const SPONSORS = [
@@ -56,10 +56,6 @@ export const S06CtaEndFrame: React.FC = () => {
   });
 
   // ── Atmosphere: slow orb drift right→left for gentle motion ──────────────
-  const orbX = interpolate(frame, [0, SCENE_TOTAL], [0.4, -0.4], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
 
   // ── CTA heading ───────────────────────────────────────────────────────────
   const ctaSpring = spring({
@@ -68,7 +64,7 @@ export const S06CtaEndFrame: React.FC = () => {
     config: heroSpring,
     durationInFrames: 32,
   });
-  const ctaY = (1 - ctaSpring) * 45;
+  const ctaY = ctaSpring > 0.96 ? 0 : (1 - ctaSpring) * 45;
 
   // ── URL ───────────────────────────────────────────────────────────────────
   const urlSpring = spring({
@@ -82,12 +78,11 @@ export const S06CtaEndFrame: React.FC = () => {
     <AbsoluteFill
       style={{
         background: theme.colors.bg,
-        opacity: sceneIn,
         overflow: 'hidden',
       }}
     >
       {/* Website-faithful atmosphere (same treatment as S01) */}
-      <SiteAtmosphere orbX={orbX} orbY={0} opacity={1} />
+      <SiteAtmosphere />
 
       {/* ── Content column ── */}
       <AbsoluteFill
@@ -192,7 +187,7 @@ export const S06CtaEndFrame: React.FC = () => {
                 key={file}
                 style={{
                   opacity: sponsorSpring * 0.9,
-                  transform: `scale(${0.75 + sponsorSpring * 0.25}) translateY(${(1 - sponsorSpring) * 22}px)`,
+                  transform: `scale(${sponsorSpring > 0.96 ? 1 : 0.75 + sponsorSpring * 0.25}) translateY(${sponsorSpring > 0.96 ? 0 : (1 - sponsorSpring) * 22}px)`,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -202,7 +197,7 @@ export const S06CtaEndFrame: React.FC = () => {
                 {/* Colored sponsor logo — no brightness/invert filter */}
                 <div
                   style={{
-                    height: 96,
+                    height: 154,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -212,8 +207,9 @@ export const S06CtaEndFrame: React.FC = () => {
                     src={staticFile(`assets/${file}`)}
                     style={{
                       height: '100%',
-                      maxWidth: 220,
+                      maxWidth: 270,
                       objectFit: 'contain',
+                      filter: 'drop-shadow(0 10px 24px rgba(0,0,0,0.42))',
                       // No filter — render sponsor logos in their real colors
                     }}
                   />
@@ -221,9 +217,10 @@ export const S06CtaEndFrame: React.FC = () => {
                 <span
                   style={{
                     fontFamily: montserrat,
-                    fontSize: 18,
+                    fontSize: 24,
+                    fontWeight: 500,
                     color: theme.colors.muted,
-                    letterSpacing: '0.10em',
+                    letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                     textAlign: 'center',
                   }}
@@ -252,6 +249,15 @@ export const S06CtaEndFrame: React.FC = () => {
           GEMS Founders School · Dubai, UAE
         </div>
       </AbsoluteFill>
+
+      {/* Scene fade-in overlay (avoids parent opacity on blur children) */}
+      <AbsoluteFill
+        style={{
+          background: theme.colors.bg,
+          opacity: 1 - sceneIn,
+          pointerEvents: 'none',
+        }}
+      />
 
       {/* Fade to black */}
       <AbsoluteFill

@@ -13,8 +13,8 @@ import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { heroSpring, softSpring } from '../lib/springs';
 
-// Local frame 0 = global frame 62 (10-frame overlap with S01 bloom exit)
-// Scene total: 180 frames (6.0s)
+// Local frame 0 = global frame 160
+// Scene total: 156 frames (5.2s)
 //
 // Timeline:
 //   f00–18  — scene fades in (blend with S01 bloom exit)
@@ -26,15 +26,15 @@ import { heroSpring, softSpring } from '../lib/springs';
 //   f100    — subline fades in
 //   f165–180 — scene fades out to dark for S03
 
-const SCENE_FADE_IN_END = 18;
-const LOGO_DELAY = 22;
-const EYEBROW_DELAY = 35;
-const HEADLINE_DELAY = 38;
-const LINE1_DELAY = 58;
-const LINE2_DELAY = 76;
-const SUBLINE_DELAY = 100;
-const FADE_OUT_START = 165;
-const SCENE_TOTAL = 180;
+const SCENE_FADE_IN_END = 16;
+const LOGO_DELAY = 18;
+const EYEBROW_DELAY = 26;
+const HEADLINE_DELAY = 30;
+const LINE1_DELAY = 44;
+const LINE2_DELAY = 58;
+const SUBLINE_DELAY = 84;
+const FADE_OUT_START = 142;
+const SCENE_TOTAL = 156;
 
 export const S02HeroReveal: React.FC = () => {
   const frame = useCurrentFrame();
@@ -52,15 +52,13 @@ export const S02HeroReveal: React.FC = () => {
   });
   const sceneOpacity = Math.min(sceneIn, sceneOut);
 
-  // ── hero.jpg slow ambient drift ───────────────────────────────────────────
-  const bgScale = interpolate(frame, [0, SCENE_TOTAL], [1.06, 1.0], {
+  // ── hero video slow ambient scale drift (no translateX to avoid edge gaps) ─
+  const bgScale = interpolate(frame, [0, SCENE_TOTAL], [1.08, 1.01], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const bgDriftX = interpolate(frame, [0, SCENE_TOTAL], [14, -10], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
+  const bgParallaxX = Math.sin(frame / 34) * 14;
+  const bgParallaxY = Math.cos(frame / 46) * 9;
 
   // ── Eyebrow ───────────────────────────────────────────────────────────────
   const eyebrowSpring = spring({
@@ -77,7 +75,7 @@ export const S02HeroReveal: React.FC = () => {
     config: heroSpring,
     durationInFrames: 40,
   });
-  const headlineY = (1 - headlineSpring) * 70;
+  const headlineY = headlineSpring > 0.96 ? 0 : (1 - headlineSpring) * 70;
 
   // ── Divider line ──────────────────────────────────────────────────────────
   const dividerSpring = spring({
@@ -94,7 +92,7 @@ export const S02HeroReveal: React.FC = () => {
     config: heroSpring,
     durationInFrames: 35,
   });
-  const line1X = (1 - line1Spring) * -90;
+  const line1X = line1Spring > 0.96 ? 0 : (1 - line1Spring) * -90;
 
   // ── Tagline line 2: slide from right ──────────────────────────────────────
   const line2Spring = spring({
@@ -103,7 +101,7 @@ export const S02HeroReveal: React.FC = () => {
     config: heroSpring,
     durationInFrames: 35,
   });
-  const line2X = (1 - line2Spring) * 90;
+  const line2X = line2Spring > 0.96 ? 0 : (1 - line2Spring) * 90;
 
   // ── Subline soft reveal ───────────────────────────────────────────────────
   const sublineSpring = spring({
@@ -114,19 +112,20 @@ export const S02HeroReveal: React.FC = () => {
   });
 
   // Purple bloom handoff from S01 — fades in the first 25 local frames
-  const bloomHandoff = interpolate(frame, [0, 25], [0.4, 0], {
+  const bloomHandoff = interpolate(frame, [0, 20], [0.32, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
 
   return (
-    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneOpacity }}>
+    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneOpacity, perspective: '1500px' }}>
 
       {/* ── hero.mp4 — atmospheric silk wave looping video ── */}
       <AbsoluteFill
         style={{
-          transform: `scale(${bgScale}) translateX(${bgDriftX}px)`,
+          transform: `scale(${bgScale}) translateX(${bgParallaxX}px) translateY(${bgParallaxY}px)`,
           transformOrigin: 'center center',
+          zIndex: 0,
         }}
       >
         <OffthreadVideo
@@ -136,19 +135,47 @@ export const S02HeroReveal: React.FC = () => {
         />
       </AbsoluteFill>
 
-      {/* Dark overlay — controls readability */}
+      {/* Soft blurred duplicate layer emulates website hero depth/matte */}
       <AbsoluteFill
         style={{
-          background:
-            'linear-gradient(180deg, rgba(5,5,5,0.50) 0%, rgba(5,5,5,0.70) 55%, rgba(5,5,5,0.90) 100%)',
+          transform: `scale(${bgScale + 0.02}) translateX(${bgParallaxX * 0.7}px) translateY(${bgParallaxY * 0.7}px)`,
+          transformOrigin: 'center center',
+          filter: 'blur(16px)',
+          opacity: 0.2,
+          zIndex: 0,
+        }}
+      >
+        <OffthreadVideo
+          src={staticFile('assets/hero.mp4')}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          muted
+        />
+      </AbsoluteFill>
+
+      {/* Subtle bottom vignette — only for text readability at base of frame */}
+      <AbsoluteFill
+        style={{
+          background: 'linear-gradient(180deg, rgba(5,5,5,0.58) 0%, rgba(5,5,5,0.48) 42%, rgba(5,5,5,0.82) 100%)',
+          pointerEvents: 'none',
+          zIndex: 1,
         }}
       />
 
-      {/* Purple bloom handoff from S01 — dissolves the atmosphere into hero */}
       <AbsoluteFill
         style={{
-          background: `radial-gradient(ellipse 70% 50% at 50% 50%, rgba(58,12,163,${bloomHandoff}) 0%, transparent 70%)`,
+          background:
+            'radial-gradient(ellipse 84% 60% at 50% 46%, rgba(5,5,5,0.08) 0%, rgba(5,5,5,0.54) 66%, rgba(5,5,5,0.84) 100%)',
           pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      />
+
+      {/* Purple bloom handoff from Desktop scene — dissolves into hero */}
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(ellipse 70% 50% at 50% 50%, rgba(58,12,163,${bloomHandoff}) 0%, rgba(5,5,5,0.04) 62%, transparent 76%)`,
+          pointerEvents: 'none',
+          zIndex: 1,
         }}
       />
 
@@ -160,6 +187,9 @@ export const S02HeroReveal: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '0 64px',
+          transform: 'translateZ(64px)',
+          transformStyle: 'preserve-3d',
+          zIndex: 2,
         }}
       >
         {/* Crown / Logo — slightly larger */}

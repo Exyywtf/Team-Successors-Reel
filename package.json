@@ -7,8 +7,10 @@
   "private": true,
   "dependencies": {
     "@remotion/cli": "4.0.434",
-    "@remotion/google-fonts": "^4.0.434",
+    "@remotion/google-fonts": "4.0.434",
+    "@remotion/light-leaks": "4.0.434",
     "@remotion/tailwind-v4": "4.0.434",
+    "@remotion/transitions": "4.0.434",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "remotion": "4.0.434",
@@ -24,7 +26,7 @@
   },
   "scripts": {
     "dev": "remotion studio",
-    "build": "remotion bundle",
+    "build": "remotion bundle src/index.ts --bundle-cache=false",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc"
   },

@@ -7,7 +7,7 @@ import { theme } from '../lib/theme';
 import { orbitron } from '../lib/fonts';
 import { snappySpring } from '../lib/springs';
 
-// Scene duration: 72 frames (2.4s)
+// Scene duration: 66 frames (2.2s)
 //
 // Timeline:
 //   f00–12  — search bar springs in
@@ -20,8 +20,8 @@ const URL_TEXT = 'https://successorsf1.com';
 const TYPE_START = 10;
 const FRAMES_PER_CHAR = 2.2;
 // Exit begins after a brief hold post-typing (typing completes ≈ f58)
-const EXIT_START = 61;
-const SCENE_END = 72;
+const EXIT_START = 56;
+const SCENE_END = 66;
 
 export const S01UrlIntro: React.FC = () => {
   const frame = useCurrentFrame();
@@ -52,11 +52,6 @@ export const S01UrlIntro: React.FC = () => {
   const finalOpacity = enterOpacity * exitOpacity;
 
   // ── Atmosphere orb: very slow drift left→right during scene ──────────────
-  const orbX = interpolate(frame, [0, SCENE_END], [-0.5, 0.5], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
   return (
     <AbsoluteFill
       style={{
@@ -65,7 +60,7 @@ export const S01UrlIntro: React.FC = () => {
       }}
     >
       {/* Website-faithful atmosphere — this IS the background */}
-      <SiteAtmosphere orbX={orbX} orbY={0} opacity={1} />
+      <SiteAtmosphere />
 
       {/* Search bubble centered */}
       <AbsoluteFill
