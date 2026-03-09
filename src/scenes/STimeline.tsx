@@ -54,8 +54,8 @@ export const STimeline: React.FC = () => {
     config: heroSpring,
     durationInFrames: 28,
   });
-  const timelineY = (1 - timelineSpring) * -60;
-  const timelineScale = 1.02 - timelineSpring * 0.02; // very subtle settle, no crop-in zoom
+  const timelineY = timelineSpring > 0.96 ? 0 : (1 - timelineSpring) * -60;
+  const timelineScale = timelineSpring > 0.96 ? 1 : 1.02 - timelineSpring * 0.02;
 
   // ── "Nationals" slam ───────────────────────────────────────────────────────
   const nationalsSpring = spring({
@@ -64,7 +64,7 @@ export const STimeline: React.FC = () => {
     config: heroSpring,
     durationInFrames: 22,
   });
-  const nationalsY = (1 - nationalsSpring) * 52;
+  const nationalsY = nationalsSpring > 0.96 ? 0 : (1 - nationalsSpring) * 52;
 
   // ── "UAE" gold accent ──────────────────────────────────────────────────────
   const uaeSpring = spring({
@@ -88,31 +88,31 @@ export const STimeline: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 36,
-          padding: '60px 72px',
+          gap: 46,
+          padding: '64px 72px',
         }}
       >
         {/* ── Single card framing both timeline images ── */}
         <div
           style={{
             width: '100%',
-            maxWidth: 900,
+            maxWidth: 960,
             flexShrink: 0,
             transform: `translateY(${timelineY}px) scale(${timelineScale})`,
             transformOrigin: 'center top',
-            opacity: timelineSpring,
+            opacity: timelineSpring > 0.96 ? 1 : timelineSpring,
             borderRadius: 14,
             border: '1px solid rgba(255,255,255,0.10)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.72), 0 0 0 1px rgba(131,56,236,0.15)',
             background: 'rgba(10,10,14,0.70)',
-            padding: '20px',
+            padding: '24px',
             display: 'flex',
             flexDirection: 'column',
-            gap: 14,
+            gap: 18,
           }}
         >
           {/* Row 1 — slightly inset from card edges */}
-          <div style={{ borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ borderRadius: 10, overflow: 'hidden' }}>
             <Img
               src={staticFile('assets/timeline-row1-with-car.png')}
               style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
@@ -120,7 +120,7 @@ export const STimeline: React.FC = () => {
           </div>
 
           {/* Row 2 — same treatment */}
-          <div style={{ borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ borderRadius: 10, overflow: 'hidden' }}>
             <Img
               src={staticFile('assets/timeline-row2.png')}
               style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
@@ -132,7 +132,7 @@ export const STimeline: React.FC = () => {
         <div
           style={{
             transform: `translateY(${nationalsY}px)`,
-            opacity: nationalsSpring,
+            opacity: nationalsSpring > 0.96 ? 1 : nationalsSpring,
             textAlign: 'center',
           }}
         >
@@ -154,9 +154,10 @@ export const STimeline: React.FC = () => {
         {/* ── "UAE · Q2 Race Window" gold accent ── */}
         <div
           style={{
-            opacity: uaeSpring,
-            transform: `translateY(${(1 - uaeSpring) * 22}px)`,
+            opacity: uaeSpring > 0.96 ? 1 : uaeSpring,
+            transform: `translateY(${uaeSpring > 0.96 ? 0 : (1 - uaeSpring) * 22}px)`,
             textAlign: 'center',
+            marginTop: 4,
           }}
         >
           <div

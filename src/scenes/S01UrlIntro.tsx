@@ -1,27 +1,31 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
+import { AbsoluteFill, Easing, useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
 import { SearchBubble } from '../components/SearchBubble';
 import { TypewriterText } from '../components/Typewriter';
 import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron } from '../lib/fonts';
 import { snappySpring } from '../lib/springs';
+import { SCENE_DURATIONS, TRANSITION_DURATIONS } from '../lib/timing';
 
-// Scene duration: 66 frames (2.2s)
+// Scene timing is derived from timing.ts so the local exit stays in sync
+// with sequence retimes.
 //
 // Timeline:
 //   f00–12  — search bar springs in
-//   f10–58  — URL types out (22 chars × 2.2 fr/char)
-//   f58–62  — hold with cursor blinking; typing complete
-//   f60–72  — gentle premium exit: bar scales 1.0→1.12 + fades out
-//             S02 starts overlapping at global f62 for continuity
+//   f10–70  — URL types out
+//   f70–84  — short hold with cursor blinking; typing complete
+//   f84–104 — gentle premium exit: bar scales 1.0→1.08 + fades out
 
 const URL_TEXT = 'https://successorsf1.com';
 const TYPE_START = 10;
-const FRAMES_PER_CHAR = 2.2;
-// Exit begins after a brief hold post-typing (typing completes ≈ f58)
-const EXIT_START = 56;
-const SCENE_END = 66;
+const FRAMES_PER_CHAR = 2.5;
+const TYPE_END = TYPE_START + URL_TEXT.length * FRAMES_PER_CHAR;
+const HOLD_AFTER_TYPING = 12;
+const SCENE_END = SCENE_DURATIONS.S01;
+const EXIT_DURATION = Math.min(20, TRANSITION_DURATIONS.T01);
+// Exit begins after a brief hold post-typing and stays synced to scene retimes.
+const EXIT_START = Math.max(TYPE_END + HOLD_AFTER_TYPING, SCENE_END - EXIT_DURATION);
 
 export const S01UrlIntro: React.FC = () => {
   const frame = useCurrentFrame();
@@ -42,9 +46,9 @@ export const S01UrlIntro: React.FC = () => {
   const exitProgress = interpolate(frame, [EXIT_START, SCENE_END], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-    easing: (t) => t * t * (3 - 2 * t), // smoothstep — premium feel
+    easing: Easing.bezier(0.22, 0.61, 0.36, 1),
   });
-  const exitScale = 1 + exitProgress * 0.10;    // 1.0 → 1.10, very restrained
+  const exitScale = 1 + exitProgress * 0.08;    // 1.0 → 1.08, softer handoff
   const exitOpacity = 1 - exitProgress;          // 1 → 0 smoothly
 
   // Combine
@@ -72,9 +76,11 @@ export const S01UrlIntro: React.FC = () => {
       >
         <div
           style={{
-            transform: `scale(${finalScale})`,
+            transform: `scale(${finalScale}) translateZ(0)`,
             opacity: finalOpacity,
             transformOrigin: 'center center',
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
           }}
         >
           <SearchBubble

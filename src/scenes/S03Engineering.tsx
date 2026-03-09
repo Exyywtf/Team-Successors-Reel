@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   Img,
   staticFile,
   useCurrentFrame,
@@ -10,7 +11,7 @@ import {
 } from 'remotion';
 import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
-import { heroSpring, cardSpring, softSpring } from '../lib/springs';
+import { heroSpring, glideSpring, softSpring } from '../lib/springs';
 
 // Scene duration: 180 frames (6.0s), global start: 242
 //
@@ -36,6 +37,18 @@ const CHAIN_DELAY = 140;
 const FADE_OUT_START = 165;
 const SCENE_TOTAL = 180;
 
+const formatPrecisionTarget = (value: number) => {
+  if (value >= 9.95) {
+    return '10mm';
+  }
+
+  if (value >= 1) {
+    return `${value.toFixed(1).replace(/\.0$/, '')}mm`;
+  }
+
+  return `${value.toFixed(1)}mm`;
+};
+
 export const S03Engineering: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -58,9 +71,9 @@ export const S03Engineering: React.FC = () => {
     config: heroSpring,
     durationInFrames: 30,
   });
-  const cfdScale = 1.10 - cfdEntry * 0.10; // 1.10 → 1.00
+  const cfdScale = cfdEntry > 0.96 ? 1.02 : 1.09 - cfdEntry * 0.07;
   // Slow ambient drift across the scene
-  const cfdDriftX = interpolate(frame, [10, SCENE_TOTAL], [0, -22], {
+  const cfdDriftX = interpolate(frame, [10, SCENE_TOTAL], [0, -16], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
@@ -78,7 +91,7 @@ export const S03Engineering: React.FC = () => {
     config: heroSpring,
     durationInFrames: 30,
   });
-  const analyzeY = (1 - analyzeSpring) * 40;
+  const analyzeY = analyzeSpring > 0.96 ? 0 : (1 - analyzeSpring) * 40;
 
   // ── "ANSYS CFD Simulation" sub-label ──────────────────────────────────────
   const cfdSubSpring = spring({
@@ -92,38 +105,50 @@ export const S03Engineering: React.FC = () => {
   const pillSpring = spring({
     frame: Math.max(0, frame - PILL_DELAY),
     fps,
-    config: cardSpring,
+    config: glideSpring,
     durationInFrames: 22,
   });
   const pillX = (1 - pillSpring) * 180;
+  const precisionCountProgress = interpolate(
+    frame,
+    [PILL_DELAY + 18, PILL_DELAY + 38],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.bezier(0.18, 0.94, 0.32, 1),
+    }
+  );
+  const precisionValue = 10 - 9.9 * precisionCountProgress;
 
   // ── Cards phase opacity ────────────────────────────────────────────────────
-  const cardsIn = interpolate(frame, [CARDS_PHASE_START, CARDS_PHASE_START + 18], [0, 1], {
+  const cardsIn = interpolate(frame, [CARDS_PHASE_START, CARDS_PHASE_START + 14], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: (t) => t * t * (3 - 2 * t),
   });
 
   // ── Card 1 (Design) — enters from left ────────────────────────────────────
   const card1Spring = spring({
     frame: Math.max(0, frame - CARD1_DELAY),
     fps,
-    config: cardSpring,
-    durationInFrames: 32,
+    config: glideSpring,
+    durationInFrames: 40,
   });
-  const card1X = (1 - card1Spring) * -260;
-  const card1Y = (1 - card1Spring) * 38;
-  const card1Scale = 0.92 + card1Spring * 0.08;
+  const card1X = (1 - card1Spring) * -220;
+  const card1Y = (1 - card1Spring) * 26;
+  const card1Scale = 0.95 + card1Spring * 0.05;
 
   // ── Card 2 (Validate) — enters from right ─────────────────────────────────
   const card2Spring = spring({
     frame: Math.max(0, frame - CARD2_DELAY),
     fps,
-    config: cardSpring,
-    durationInFrames: 32,
+    config: glideSpring,
+    durationInFrames: 40,
   });
-  const card2X = (1 - card2Spring) * 260;
-  const card2Y = (1 - card2Spring) * 34;
-  const card2Scale = 0.92 + card2Spring * 0.08;
+  const card2X = (1 - card2Spring) * 220;
+  const card2Y = (1 - card2Spring) * 24;
+  const card2Scale = 0.95 + card2Spring * 0.05;
 
   // ── "CAD → CFD → CNC" label ───────────────────────────────────────────────
   const chainSpring = spring({
@@ -155,15 +180,27 @@ export const S03Engineering: React.FC = () => {
         {/* Bottom gradient — pulls focus to labels without hiding CFD detail */}
         <AbsoluteFill
           style={{
-            background:
-              'linear-gradient(180deg, rgba(5,5,5,0.15) 0%, rgba(5,5,5,0.08) 35%, rgba(5,5,5,0.55) 72%, rgba(5,5,5,0.94) 100%)',
+            transform: `scale(${cfdScale + 0.018}) translateX(${cfdDriftX * 0.7}px)`,
+            transformOrigin: 'center center',
+            filter: 'blur(16px)',
+            opacity: 0.18,
           }}
-        />
-        {/* Side vignettes */}
+        >
+          <Img
+            src={staticFile('assets/concept-gamma-cfd.jpeg')}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </AbsoluteFill>
         <AbsoluteFill
           style={{
             background:
-              'linear-gradient(90deg, rgba(5,5,5,0.50) 0%, transparent 28%, transparent 72%, rgba(5,5,5,0.50) 100%)',
+              'linear-gradient(180deg, rgba(5,5,5,0.15) 0%, rgba(5,5,5,0.10) 42%, rgba(5,5,5,0.32) 100%)',
+          }}
+        />
+        <AbsoluteFill
+          style={{
+            background:
+              'radial-gradient(ellipse 84% 60% at 50% 46%, rgba(5,5,5,0.01) 0%, rgba(5,5,5,0.13) 66%, rgba(5,5,5,0.29) 100%)',
           }}
         />
 
@@ -174,7 +211,7 @@ export const S03Engineering: React.FC = () => {
             left: 60,
             bottom: 240,
             transform: `translateY(${analyzeY}px)`,
-            opacity: analyzeSpring,
+            opacity: analyzeSpring > 0.96 ? 1 : analyzeSpring,
           }}
         >
           <div
@@ -195,14 +232,15 @@ export const S03Engineering: React.FC = () => {
             style={{
               fontFamily: montserrat,
               fontSize: 26,
-              fontWeight: 600,
-              color: theme.colors.textDim,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              marginTop: 14,
-              opacity: cfdSubSpring,
-            }}
-          >
+            fontWeight: 600,
+            color: theme.colors.textDim,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            marginTop: 14,
+            marginLeft: 4,
+            opacity: cfdSubSpring,
+          }}
+        >
             ANSYS CFD Simulation
           </div>
         </div>
@@ -249,7 +287,7 @@ export const S03Engineering: React.FC = () => {
                 textShadow: `0 0 30px rgba(255,255,255,0.20)`,
               }}
             >
-              0.1mm
+              {formatPrecisionTarget(precisionValue)}
             </div>
           </div>
         </div>
@@ -317,8 +355,8 @@ export const S03Engineering: React.FC = () => {
             left: 0,
             right: 0,
             textAlign: 'center',
-            opacity: chainSpring,
-            transform: `translateY(${(1 - chainSpring) * 18}px)`,
+            opacity: chainSpring > 0.96 ? 1 : chainSpring,
+            transform: `translateY(${chainSpring > 0.96 ? 0 : (1 - chainSpring) * 18}px)`,
           }}
         >
           <div
@@ -421,9 +459,10 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
 
     {/* Card content — real site card-pad-default: 24px */}
     <div style={{ padding: '20px 24px 28px' }}>
-      {/* Stage/eyebrow label — real site .type-label */}
+      {/* Stage badge — real site .type-label with pill treatment */}
       <div
         style={{
+          display: 'inline-block',
           fontFamily: orbitron,
           fontSize: 10,
           fontWeight: 700,
@@ -431,7 +470,10 @@ const EngineeringCard: React.FC<EngineeringCardProps> = ({
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
           marginBottom: 10,
-          opacity: 0.85,
+          padding: '4px 12px',
+          background: 'rgba(229,184,11,0.08)',
+          border: '1px solid rgba(229,184,11,0.18)',
+          borderRadius: 999,
         }}
       >
         {stageLabel}

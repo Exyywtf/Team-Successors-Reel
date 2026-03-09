@@ -53,12 +53,17 @@ export const S02HeroReveal: React.FC = () => {
   const sceneOpacity = Math.min(sceneIn, sceneOut);
 
   // ── hero video slow ambient scale drift (no translateX to avoid edge gaps) ─
-  const bgScale = interpolate(frame, [0, SCENE_TOTAL], [1.08, 1.01], {
+  const bgScale = interpolate(frame, [0, SCENE_TOTAL], [1.08, 1.02], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const bgParallaxX = Math.sin(frame / 34) * 14;
-  const bgParallaxY = Math.cos(frame / 46) * 9;
+  // Parallax damps to zero after entry so scene locks in once text settles
+  const parallaxDamp = interpolate(frame, [0, 50], [1, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const bgParallaxX = Math.sin(frame / 34) * 14 * parallaxDamp;
+  const bgParallaxY = Math.cos(frame / 46) * 9 * parallaxDamp;
 
   // ── Eyebrow ───────────────────────────────────────────────────────────────
   const eyebrowSpring = spring({
@@ -118,7 +123,7 @@ export const S02HeroReveal: React.FC = () => {
   });
 
   return (
-    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneOpacity, perspective: '1500px' }}>
+    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneOpacity }}>
 
       {/* ── hero.mp4 — atmospheric silk wave looping video ── */}
       <AbsoluteFill
@@ -187,8 +192,6 @@ export const S02HeroReveal: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '0 64px',
-          transform: 'translateZ(64px)',
-          transformStyle: 'preserve-3d',
           zIndex: 2,
         }}
       >
@@ -225,7 +228,7 @@ export const S02HeroReveal: React.FC = () => {
             lineHeight: 0.9,
             textAlign: 'center',
             transform: `translateY(${headlineY}px)`,
-            opacity: headlineSpring,
+            opacity: headlineSpring > 0.96 ? 1 : headlineSpring,
             textShadow: `0 0 60px rgba(131,56,236,0.5), 0 0 120px rgba(131,56,236,0.22)`,
           }}
         >
@@ -235,7 +238,7 @@ export const S02HeroReveal: React.FC = () => {
         {/* Gold divider */}
         <div
           style={{
-            width: `${dividerSpring * 220}px`,
+            width: `${dividerSpring > 0.96 ? 220 : dividerSpring * 220}px`,
             height: 2,
             background: `linear-gradient(90deg, transparent, ${theme.colors.gold}, transparent)`,
             margin: '24px auto',
@@ -253,7 +256,7 @@ export const S02HeroReveal: React.FC = () => {
             letterSpacing: '0.03em',
             textAlign: 'center',
             transform: `translateX(${line1X}px)`,
-            opacity: line1Spring,
+            opacity: line1Spring > 0.96 ? 1 : line1Spring,
             lineHeight: 1.2,
           }}
         >
@@ -270,7 +273,7 @@ export const S02HeroReveal: React.FC = () => {
             letterSpacing: '0.03em',
             textAlign: 'center',
             transform: `translateX(${line2X}px)`,
-            opacity: line2Spring,
+            opacity: line2Spring > 0.96 ? 1 : line2Spring,
             marginTop: 8,
             lineHeight: 1.2,
           }}

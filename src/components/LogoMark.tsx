@@ -23,8 +23,8 @@ export const LogoMark: React.FC<LogoMarkProps> = ({
     durationInFrames: 40,
   });
 
-  const scale = 0.6 + progress * 0.4;
-  const opacity = progress;
+  const scale = progress > 0.96 ? 1 : 0.6 + progress * 0.4;
+  const opacity = progress > 0.96 ? 1 : progress;
 
   return (
     <div

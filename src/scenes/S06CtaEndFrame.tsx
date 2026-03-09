@@ -14,7 +14,7 @@ import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { heroSpring, softSpring } from '../lib/springs';
 
-// Scene duration: 96 frames (3.2s), global start: 596
+// Scene duration: 108 frames (3.6s), global start: 596
 //
 // Timeline:
 //   f00–12  — scene fades in
@@ -22,15 +22,15 @@ import { heroSpring, softSpring } from '../lib/springs';
 //   f22     — eyebrow + CTA heading animate in
 //   f36     — URL fades in
 //   f48     — sponsor logos stagger in
-//   f84–96  — fade to black
+//   f93–108  — fade to black
 
 const SCENE_FADE_IN = 12;
 const LOGO_DELAY = 6;
 const CTA_DELAY = 22;
 const URL_DELAY = 36;
 const SPONSORS_DELAY = 46;
-const FADE_TO_BLACK_START = 84;
-const SCENE_TOTAL = 96;
+const FADE_TO_BLACK_START = 93;
+const SCENE_TOTAL = 108;
 
 // Sponsor config — colored, no invert filter
 const SPONSORS = [
@@ -108,7 +108,7 @@ export const S06CtaEndFrame: React.FC = () => {
             color: theme.colors.gold,
             letterSpacing: '0.26em',
             textTransform: 'uppercase',
-            opacity: ctaSpring,
+            opacity: ctaSpring > 0.96 ? 1 : ctaSpring,
             marginBottom: 20,
             textAlign: 'center',
           }}
@@ -127,7 +127,7 @@ export const S06CtaEndFrame: React.FC = () => {
             textAlign: 'center',
             lineHeight: 1.08,
             transform: `translateY(${ctaY}px)`,
-            opacity: ctaSpring,
+            opacity: ctaSpring > 0.96 ? 1 : ctaSpring,
             textShadow: `0 0 40px rgba(131,56,236,0.35)`,
             maxWidth: 900,
           }}
@@ -138,11 +138,11 @@ export const S06CtaEndFrame: React.FC = () => {
         {/* Gold rule */}
         <div
           style={{
-            width: `${ctaSpring * 180}px`,
+            width: `${ctaSpring > 0.96 ? 180 : ctaSpring * 180}px`,
             height: 2,
             background: `linear-gradient(90deg, transparent, ${theme.colors.gold}, transparent)`,
             margin: '26px auto',
-            opacity: ctaSpring,
+            opacity: ctaSpring > 0.96 ? 1 : ctaSpring,
           }}
         />
 
@@ -218,7 +218,7 @@ export const S06CtaEndFrame: React.FC = () => {
                   style={{
                     fontFamily: montserrat,
                     fontSize: 24,
-                    fontWeight: 500,
+                    fontWeight: 600,
                     color: theme.colors.muted,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',

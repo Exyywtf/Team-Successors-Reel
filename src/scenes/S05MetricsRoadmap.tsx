@@ -64,12 +64,12 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
   const countProgress = spring({
     frame: Math.max(0, frame - (start + 2)),
     fps,
-    config: { damping: 22, stiffness: 240, mass: 0.7, overshootClamping: false },
+    config: { damping: 22, stiffness: 240, mass: 0.7, overshootClamping: true },
     durationInFrames: 26,
   });
 
-  const depthY = (1 - pop) * 64;
-  const depthScale = 0.78 + pop * 0.22;
+  const depthY = pop > 0.96 ? 0 : (1 - pop) * 64;
+  const depthScale = pop > 0.96 ? 1 : 0.78 + pop * 0.22;
   const glowColor =
     glow === 'gold'
       ? 'rgba(229,184,11,0.55), 0 0 140px rgba(229,184,11,0.2)'
@@ -85,8 +85,7 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          perspective: '1200px',
-          transform: `translateZ(0)`,
+          transform: 'translateZ(0)',
         }}
       >
         <div
@@ -108,11 +107,11 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
 
         <div
           style={{
-            width: `${subtitle * 220}px`,
+            width: `${subtitle > 0.96 ? 220 : subtitle * 220}px`,
             height: 2,
             marginTop: 26,
             marginBottom: 24,
-            opacity: subtitle,
+            opacity: subtitle > 0.96 ? 1 : subtitle,
             background: `linear-gradient(90deg, transparent, ${ruleColor}, transparent)`,
           }}
         />
@@ -126,8 +125,8 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
             textAlign: 'center',
-            transform: `translateY(${(1 - subtitle) * 16}px)`,
-            opacity: subtitle,
+            transform: `translateY(${subtitle > 0.96 ? 0 : (1 - subtitle) * 16}px)`,
+            opacity: subtitle > 0.96 ? 1 : subtitle,
           }}
         >
           {label}

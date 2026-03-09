@@ -65,8 +65,8 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
           position: 'absolute',
           top: '-10vh',
           right: '-12vw',
-          width: '35vw',
-          height: '35vw',
+          width: '40vw',
+          height: '40vw',
           borderRadius: '50%',
           background:
             'radial-gradient(circle at 70% 30%, rgba(255,214,2,0.34) 0%, rgba(255,214,2,0.16) 26%, rgba(255,214,2,0.00) 62%)',
@@ -78,14 +78,14 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       <div
         style={{
           position: 'absolute',
-          bottom: '-12vh',
-          left: '-12vw',
-          width: '38vw',
-          height: '38vw',
+          bottom: '-10vh',
+          left: '-10vw',
+          width: '36vw',
+          height: '36vw',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle at 30% 70%, rgba(122,77,255,0.4) 0%, rgba(122,77,255,0.22) 22%, rgba(122,77,255,0) 62%)',
-          filter: 'blur(104px)',
+            'radial-gradient(circle at 30% 70%, rgba(122,77,255,0.38) 0%, rgba(122,77,255,0.2) 22%, rgba(122,77,255,0) 62%)',
+          filter: 'blur(90px)',
           opacity: LEAK_OPACITY,
         }}
       />

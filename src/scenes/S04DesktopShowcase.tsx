@@ -14,8 +14,10 @@ import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { softSpring } from '../lib/springs';
+import { SCENE_DURATIONS, TRANSITION_DURATIONS } from '../lib/timing';
 
-// Scene duration: 120 frames (4.0s), global start: 52
+// Scene duration follows timing.ts. The entrance envelope is intentionally
+// longer than before so the S01 → S02 overlap reads as a soft blend, not a snap.
 //
 // Faithful 2.5D recreation of successorsf1.com desktop homepage.
 // Scrolls through ALL 9 real homepage sections in order:
@@ -29,15 +31,17 @@ import { softSpring } from '../lib/springs';
 //   8. Partnership    — "Sponsor With Clear Outcomes" CTA card
 //   9. Footer         — brand, nav, contact columns
 //
-// Timeline:
-//   f00–24   — scene fades in, viewport floats in with depth push
-//   f24–108  — premium quick-glance scroll through sections
+// Timeline with current timings:
+//   f00–18   — scene fades in under the URL handoff
+//   f00–40   — viewport floats in with a slower-starting depth push
+//   f34–104  — premium quick-glance scroll through sections
 //   f108–120 — fade to black
 
-const FADE_IN_END = 12;
-const PUSH_END = 26;
-const FADE_OUT_START = 108;
-const SCENE_TOTAL = 120;
+const SCENE_TOTAL = SCENE_DURATIONS.S02;
+const ENTRANCE_BLEND_END = Math.min(40, TRANSITION_DURATIONS.T01 + 8);
+const FADE_IN_END = Math.round(ENTRANCE_BLEND_END * 0.45);
+const PUSH_END = ENTRANCE_BLEND_END;
+const FADE_OUT_START = SCENE_TOTAL - 12;
 
 // Viewport logical dimensions
 const VP_WIDTH = 920;
@@ -65,19 +69,21 @@ const INNER_TOTAL_H =
 // Total scroll = inner height - viewport content area
 const SCROLL_DISTANCE = INNER_TOTAL_H - VP_CONTENT_H;
 
-const SCROLL_START = 16;
-const SCROLL_END = 104;
+const SCROLL_START = Math.max(FADE_IN_END + 16, TRANSITION_DURATIONS.T01 + 2);
+const SCROLL_END = SCENE_TOTAL - 16;
 const SCROLL_TARGET = SCROLL_DISTANCE * 0.92;
 
 export const S04DesktopShowcase: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const fadeInEase = Easing.bezier(0.22, 0.61, 0.36, 1);
+  const popInEase = Easing.bezier(0.32, 0.04, 0.18, 1);
 
   // ── Scene envelope ─────────────────────────────────────────────────────────
   const sceneIn = interpolate(frame, [0, FADE_IN_END], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-    easing: (t) => t * t * (3 - 2 * t),
+    easing: fadeInEase,
   });
   const fadeToBlack = interpolate(frame, [FADE_OUT_START, SCENE_TOTAL], [0, 1], {
     extrapolateLeft: 'clamp',
@@ -88,7 +94,7 @@ export const S04DesktopShowcase: React.FC = () => {
   const cameraPush = interpolate(frame, [0, PUSH_END], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-    easing: (t) => t * t * (3 - 2 * t),
+    easing: popInEase,
   });
   const cameraDriftX = Math.sin(frame / 42) * 5.2;
   const cameraDriftY = Math.cos(frame / 58) * 3.1;
@@ -111,7 +117,7 @@ export const S04DesktopShowcase: React.FC = () => {
   });
   const prevScrollY = -SCROLL_TARGET * prevScrollProgress;
   const scrollVelocity = Math.abs(innerScrollY - prevScrollY);
-  const blurEnvelope = interpolate(
+  const glowEnvelope = interpolate(
     frame,
     [SCROLL_START, SCROLL_START + 8, SCROLL_END - 8, SCROLL_END],
     [0, 1, 1, 0],
@@ -120,11 +126,11 @@ export const S04DesktopShowcase: React.FC = () => {
       extrapolateRight: 'clamp',
     }
   );
-  const scrollBlur =
+  const glowLift =
     interpolate(scrollVelocity, [0, 5, 12], [0, 0.2, 0.72], {
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
-    }) * blurEnvelope;
+    }) * glowEnvelope;
 
   // ── Video parallax in hero ─────────────────────────────────────────────────
   const videoParallaxX = interpolate(frame, [0, PUSH_END], [12, 0], {
@@ -140,7 +146,7 @@ export const S04DesktopShowcase: React.FC = () => {
     config: softSpring,
     durationInFrames: 22,
   });
-  const urlFadeOut = interpolate(frame, [74, 96], [1, 0], {
+  const urlFadeOut = interpolate(frame, [FADE_OUT_START, SCENE_TOTAL], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
@@ -162,11 +168,11 @@ export const S04DesktopShowcase: React.FC = () => {
           style={{
             width: 1020,
             height: 720,
-            transform: `translateX(${cameraDriftX * 0.45}px) translateY(${cameraDriftY * 0.45}px)`,
+            transform: `translateX(${cameraDriftX * 0.45}px) translateY(${cameraDriftY * 0.45}px) scale(${1 + glowLift * 0.035})`,
             background:
               'radial-gradient(ellipse 62% 44% at 50% 50%, rgba(131,56,236,0.36) 0%, rgba(58,12,163,0.16) 36%, transparent 76%)',
-            filter: `blur(${(88 + scrollBlur * 34).toFixed(2)}px)`,
-            opacity: 0.9,
+            filter: 'blur(96px)',
+            opacity: 0.84 + glowLift * 0.1,
           }}
         />
       </AbsoluteFill>
@@ -242,34 +248,35 @@ export const S04DesktopShowcase: React.FC = () => {
         </div>{/* end 3D viewport wrapper */}
       </AbsoluteFill>
 
-      {/* ── Floating URL badge ── */}
+      {/* ── Floating URL badge — under viewport, visible until scene exit ── */}
       <div
         style={{
           position: 'absolute',
-          bottom: '13%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          opacity: urlBadgeSpring * urlFadeOut,
+          bottom: '10%',
+          left: 0,
+          right: 0,
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          justifyContent: 'center',
+          gap: 10,
+          opacity: urlBadgeSpring * urlFadeOut,
         }}
       >
         <div
           style={{
-            width: 6, height: 6, borderRadius: '50%',
+            width: 7, height: 7, borderRadius: '50%',
             background: theme.colors.gold,
-            boxShadow: '0 0 10px rgba(229,184,11,0.8)',
+            boxShadow: '0 0 12px rgba(229,184,11,0.8)',
           }}
         />
         <div
           style={{
             fontFamily: orbitron,
-            fontSize: 16,
+            fontSize: 28,
             fontWeight: 700,
             color: theme.colors.gold,
             letterSpacing: '0.08em',
-            textShadow: '0 0 20px rgba(229,184,11,0.5)',
+            textShadow: '0 0 24px rgba(229,184,11,0.5)',
           }}
         >
           successorsf1.com
@@ -1132,4 +1139,3 @@ const FooterSection: React.FC = () => (
     </div>
   </div>
 );
-

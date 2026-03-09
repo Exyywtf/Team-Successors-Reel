@@ -16,6 +16,14 @@ export const cardSpring: SpringConfig = {
   overshootClamping: false,
 };
 
+/** Smooth glide — high damping, no overshoot, for card entries that settle cleanly */
+export const glideSpring: SpringConfig = {
+  damping: 34,
+  stiffness: 150,
+  mass: 1,
+  overshootClamping: true,
+};
+
 /** Ultra-snappy slam entries */
 export const snappySpring: SpringConfig = {
   damping: 40,
