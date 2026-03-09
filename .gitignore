@@ -1,8 +1,17 @@
 node_modules
 dist
 build
+renders
+render
 .DS_Store
 .env
+.agent
+.agents
+.claude
+.codex
+.gemini
+.goose
+.opencode
 
 # Ignore the output video from Git but not videos you import into src/.
 out
