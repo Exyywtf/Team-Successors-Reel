@@ -486,7 +486,7 @@ export default function CinematicBackground() {
 
   const goldStyle: CSSProperties = {
     ...layerBaseStyle,
-    top: "-10vh",
+    top: "-12vh",
     right: "-12vw",
     width: goldSize,
     height: goldSize,

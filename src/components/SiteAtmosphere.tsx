@@ -63,7 +63,7 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       <div
         style={{
           position: 'absolute',
-          top: '-10vh',
+          top: '-18vh',
           right: '-12vw',
           width: '40vw',
           height: '40vw',

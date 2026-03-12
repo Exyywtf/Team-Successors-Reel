@@ -259,6 +259,7 @@ const EngineeringBetaCardsIntro: React.FC = () => {
   const fadeToBlack = interpolate(frame, [FADE_OUT_START, SCENE_TOTAL], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: Easing.bezier(0.22, 0.61, 0.36, 1),
   });
 
   const phaseOneBlendOut = interpolate(

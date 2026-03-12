@@ -53,9 +53,8 @@ export const S06CtaEndFrame: React.FC = () => {
   const fadeToBlack = interpolate(frame, [FADE_TO_BLACK_START, SCENE_TOTAL], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: (t: number) => t * t * (3 - 2 * t), // smoothstep
   });
-
-  // ── Atmosphere: slow orb drift right→left for gentle motion ──────────────
 
   // ── CTA heading ───────────────────────────────────────────────────────────
   const ctaSpring = spring({
@@ -64,7 +63,7 @@ export const S06CtaEndFrame: React.FC = () => {
     config: heroSpring,
     durationInFrames: 32,
   });
-  const ctaY = ctaSpring > 0.96 ? 0 : (1 - ctaSpring) * 45;
+  const ctaY = (1 - ctaSpring) * 45;
 
   // ── URL ───────────────────────────────────────────────────────────────────
   const urlSpring = spring({
@@ -84,7 +83,7 @@ export const S06CtaEndFrame: React.FC = () => {
       {/* Website-faithful atmosphere (same treatment as S01) */}
       <SiteAtmosphere />
 
-      {/* ── Content column ── */}
+      {/* ── Content column — with camera breathing ── */}
       <AbsoluteFill
         style={{
           display: 'flex',
@@ -108,7 +107,7 @@ export const S06CtaEndFrame: React.FC = () => {
             color: theme.colors.gold,
             letterSpacing: '0.26em',
             textTransform: 'uppercase',
-            opacity: ctaSpring > 0.96 ? 1 : ctaSpring,
+            opacity: Math.min(ctaSpring * 1.1, 1),
             marginBottom: 20,
             textAlign: 'center',
           }}
@@ -127,7 +126,7 @@ export const S06CtaEndFrame: React.FC = () => {
             textAlign: 'center',
             lineHeight: 1.08,
             transform: `translateY(${ctaY}px)`,
-            opacity: ctaSpring > 0.96 ? 1 : ctaSpring,
+            opacity: Math.min(ctaSpring * 1.1, 1),
             textShadow: `0 0 40px rgba(131,56,236,0.35)`,
             maxWidth: 900,
           }}
@@ -138,11 +137,11 @@ export const S06CtaEndFrame: React.FC = () => {
         {/* Gold rule */}
         <div
           style={{
-            width: `${ctaSpring > 0.96 ? 180 : ctaSpring * 180}px`,
+            width: `${Math.min(ctaSpring * 1.05, 1) * 180}px`,
             height: 2,
             background: `linear-gradient(90deg, transparent, ${theme.colors.gold}, transparent)`,
             margin: '26px auto',
-            opacity: ctaSpring > 0.96 ? 1 : ctaSpring,
+            opacity: Math.min(ctaSpring * 1.1, 1),
           }}
         />
 
@@ -187,7 +186,7 @@ export const S06CtaEndFrame: React.FC = () => {
                 key={file}
                 style={{
                   opacity: sponsorSpring * 0.9,
-                  transform: `scale(${sponsorSpring > 0.96 ? 1 : 0.75 + sponsorSpring * 0.25}) translateY(${sponsorSpring > 0.96 ? 0 : (1 - sponsorSpring) * 22}px)`,
+                  transform: `scale(${0.75 + sponsorSpring * 0.25}) translateY(${(1 - sponsorSpring) * 22}px)`,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',

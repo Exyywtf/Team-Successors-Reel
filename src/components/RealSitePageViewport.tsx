@@ -184,9 +184,22 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
             height: VP_HEIGHT,
             borderRadius: 16,
             overflow: 'hidden',
-            boxShadow: '0 60px 160px rgba(0,0,0,0.88), 0 0 0 1px rgba(255,255,255,0.09), 0 0 130px rgba(58,12,163,0.32)',
+            boxShadow: `0 60px 160px rgba(0,0,0,0.88), 0 0 0 1px rgba(255,255,255,${0.09 + glowLift * 0.06}), 0 0 ${130 + glowLift * 40}px rgba(58,12,163,${0.32 + glowLift * 0.12}), 0 0 ${200 + glowLift * 60}px rgba(131,56,236,${0.08 + glowLift * 0.08})`,
           }}
         >
+          {/* Glass edge highlight — top edge catch light */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              background: `linear-gradient(90deg, transparent 5%, rgba(255,255,255,${0.12 + glowLift * 0.08}) 30%, rgba(255,255,255,${0.18 + glowLift * 0.1}) 50%, rgba(255,255,255,${0.12 + glowLift * 0.08}) 70%, transparent 95%)`,
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
+          />
           <BrowserChrome />
 
           <div

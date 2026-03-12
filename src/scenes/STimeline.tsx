@@ -74,14 +74,12 @@ export const STimeline: React.FC = () => {
     durationInFrames: 22,
   });
 
-  // Atmosphere orb drifts gently left→right
-
   return (
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
       {/* Website-faithful atmosphere — same system as S01 / S06 */}
       <SiteAtmosphere />
 
-      {/* ── Content column — flex centered ── */}
+      {/* ── Content column — flex centered, with camera breathing ── */}
       <AbsoluteFill
         style={{
           display: 'flex',

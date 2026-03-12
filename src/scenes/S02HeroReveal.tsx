@@ -107,7 +107,11 @@ export const S02HeroReveal: React.FC = () => {
   return (
     <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneOpacity, background: theme.colors.bg }}>
       <SitePreviewProvider pathname="/">
-        <AbsoluteFill style={{ ...heroBackgroundStyle, opacity: backgroundFadeOut }}>
+        <AbsoluteFill style={{
+          ...heroBackgroundStyle,
+          opacity: backgroundFadeOut,
+          transform: 'scale(1.01)',
+        }}>
           <CinematicBackground />
           <PersistentHeroVideo />
         </AbsoluteFill>

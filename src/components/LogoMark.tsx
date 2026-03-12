@@ -23,8 +23,11 @@ export const LogoMark: React.FC<LogoMarkProps> = ({
     durationInFrames: 40,
   });
 
-  const scale = progress > 0.96 ? 1 : 0.6 + progress * 0.4;
-  const opacity = progress > 0.96 ? 1 : progress;
+  // Smooth scale and opacity — no hard snap, let the spring settle naturally
+  const scale = 0.6 + progress * 0.4;
+  const opacity = Math.min(progress * 1.15, 1); // reach full opacity slightly before spring settles
+  // Subtle glow intensity ramp tied to entry
+  const glowStr = Math.min(progress * 1.2, 1);
 
   return (
     <div
@@ -33,7 +36,7 @@ export const LogoMark: React.FC<LogoMarkProps> = ({
         height: size,
         transform: `scale(${scale})`,
         opacity,
-        filter: glowColor ? `drop-shadow(0 0 20px ${glowColor})` : undefined,
+        filter: glowColor ? `drop-shadow(0 0 ${20 + glowStr * 12}px ${glowColor})` : undefined,
       }}
     >
       <Img
