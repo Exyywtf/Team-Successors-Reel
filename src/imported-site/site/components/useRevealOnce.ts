@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 
 interface UseRevealOnceOptions {
   amount?: number; // 0 to 1 (0 = immediately when 1px is in view)
@@ -22,13 +23,24 @@ export function useRevealOnce(
 ) {
   const elementRef = useRef<HTMLElement | null>(null);
   const amountThreshold = Math.min(Math.max(amount, 0), 1);
+  const frame = useCurrentFrame();
+  const { isRendering } = useRemotionEnvironment();
 
   // If disabled (reduced motion), show immediately
   const [isRevealed, setIsRevealed] = useState(disabled);
+  const [revealedAtFrame, setRevealedAtFrame] = useState<number | null>(
+    disabled ? 0 : null,
+  );
 
   useEffect(() => {
     if (disabled) {
       setIsRevealed(true);
+      setRevealedAtFrame((currentFrame) => currentFrame ?? frame);
+    }
+  }, [disabled, frame]);
+
+  useEffect(() => {
+    if (disabled || isRendering) {
       return;
     }
 
@@ -48,6 +60,7 @@ export function useRevealOnce(
 
       if (isVisible) {
         setIsRevealed(true);
+        setRevealedAtFrame((currentFrame) => currentFrame ?? frame);
       }
     };
 
@@ -61,6 +74,7 @@ export function useRevealOnce(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsRevealed(true);
+          setRevealedAtFrame((currentFrame) => currentFrame ?? frame);
           observer.disconnect(); // Trigger once and stop
         }
       },
@@ -75,7 +89,30 @@ export function useRevealOnce(
     return () => {
       observer.disconnect();
     };
-  }, [amountThreshold, disabled, priority, rootMargin]);
+  }, [amountThreshold, disabled, frame, isRendering, priority, rootMargin]);
 
-  return { ref: elementRef, isRevealed };
+  useLayoutEffect(() => {
+    if (!isRendering || disabled || isRevealed) {
+      return;
+    }
+
+    const node = elementRef.current;
+    if (!node || typeof window === "undefined") {
+      return;
+    }
+
+    const rect = node.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const revealLine = windowHeight - windowHeight * amountThreshold;
+    const isVisible = rect.top < revealLine && rect.bottom > 0;
+
+    if (!isVisible) {
+      return;
+    }
+
+    setIsRevealed(true);
+    setRevealedAtFrame(frame);
+  }, [amountThreshold, disabled, frame, isRendering, isRevealed]);
+
+  return { ref: elementRef, isRevealed, revealedAtFrame };
 }

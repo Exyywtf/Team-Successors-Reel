@@ -12,6 +12,7 @@ import {
 import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { glideSpring, heroSpring, softSpring } from '../lib/springs';
+import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { ENGINEERING_INTRO_MODE } from '../lib/engineeringIntroConfig';
 import Card from '../imported-site/site/components/ui/Card';
 import ImageWithFallback from '../imported-site/site/components/ImageWithFallback';
@@ -37,8 +38,16 @@ const SCENE_TOTAL = 180;
 const BETA_CARD_PHASE_START = 16;
 const BETA_CARD_PHASE_DURATION = 64;
 const BETA_CARD_MORPH_DURATION = 16;
+const CARD_SWAP_STAGGER = 8;
+const CARD_SWAP_SETTLE_DURATION = 30;
+const CHAIN_SYNC_APPEAR_DURATION = 12;
 const BETA_CARD_PHASE_TWO_START = BETA_CARD_PHASE_START + BETA_CARD_PHASE_DURATION;
 const CHAIN_DELAY = BETA_CARD_PHASE_TWO_START + BETA_CARD_PHASE_DURATION;
+const CHAIN_SYNC_FULLY_VISIBLE =
+  BETA_CARD_PHASE_TWO_START + CARD_SWAP_STAGGER + CARD_SWAP_SETTLE_DURATION;
+const CHAIN_SYNC_START = CHAIN_SYNC_FULLY_VISIBLE - CHAIN_SYNC_APPEAR_DURATION;
+const PRECISION_COUNT_START = PILL_DELAY + 21;
+const PRECISION_COUNT_END = PILL_DELAY + 43;
 
 const getEngineeringGalleryItem = (id: string): GalleryItem => {
   const item = siteContent.engineeringPage.gallery.find((entry) => entry.id === id);
@@ -198,7 +207,7 @@ const EngineeringCfdBackgroundIntro: React.FC = () => {
             imageSrc={staticFile('assets/concept-alpha-render.png')}
             stageLabel="01 / Design"
             title="Design"
-            subtitle="Fusion 360 CAD — precision geometry built for real-world manufacturing."
+            subtitle="Fusion 360 CAD â€” precision geometry built for real-world manufacturing."
             tiltDeg={3}
             imageHeight={320}
           />
@@ -218,7 +227,7 @@ const EngineeringCfdBackgroundIntro: React.FC = () => {
             imageSrc={staticFile('assets/concept-beta-cfd.jpeg')}
             stageLabel="02 / Validate"
             title="Validate"
-            subtitle="ANSYS CFD simulation — aerodynamic precision at 0.1mm tolerance."
+            subtitle="ANSYS CFD simulation â€” aerodynamic precision at 0.1mm tolerance."
             tiltDeg={-3}
             imageHeight={320}
           />
@@ -280,22 +289,22 @@ const EngineeringBetaCardsIntro: React.FC = () => {
     durationInFrames: 30,
   });
   const betaRightSpring = spring({
-    frame: Math.max(0, frame - (BETA_CARD_PHASE_START + 8)),
+    frame: Math.max(0, frame - (BETA_CARD_PHASE_START + CARD_SWAP_STAGGER)),
     fps,
     config: glideSpring,
-    durationInFrames: 30,
+    durationInFrames: CARD_SWAP_SETTLE_DURATION,
   });
   const gammaLeftSpring = spring({
     frame: Math.max(0, frame - BETA_CARD_PHASE_TWO_START),
     fps,
     config: glideSpring,
-    durationInFrames: 30,
+    durationInFrames: CARD_SWAP_SETTLE_DURATION,
   });
   const gammaRightSpring = spring({
-    frame: Math.max(0, frame - (BETA_CARD_PHASE_TWO_START + 8)),
+    frame: Math.max(0, frame - (BETA_CARD_PHASE_TWO_START + CARD_SWAP_STAGGER)),
     fps,
     config: glideSpring,
-    durationInFrames: 30,
+    durationInFrames: CARD_SWAP_SETTLE_DURATION,
   });
 
   const betaLeftX = (1 - betaLeftSpring) * -180 - (1 - phaseOneBlendOut) * 24;
@@ -329,20 +338,7 @@ const EngineeringBetaCardsIntro: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden', opacity: sceneIn }}>
-      <AbsoluteFill
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 56% at 50% 48%, rgba(58,12,163,0.24) 0%, rgba(20,10,32,0.22) 34%, rgba(5,5,5,0.96) 78%)',
-        }}
-      />
-      <AbsoluteFill
-        style={{
-          background:
-            'radial-gradient(ellipse 56% 34% at 50% 42%, rgba(131,56,236,0.18) 0%, transparent 74%)',
-          filter: 'blur(72px)',
-          opacity: 0.9,
-        }}
-      />
+      <SiteAtmosphere />
 
       <div
         style={{
@@ -402,7 +398,10 @@ const EngineeringBetaCardsIntro: React.FC = () => {
 
       <AnalyzeOverlay />
       <PrecisionTargetPill />
-      <EngineeringChainLabel />
+      <EngineeringChainLabel
+        startFrame={CHAIN_SYNC_START}
+        fullyVisibleFrame={CHAIN_SYNC_FULLY_VISIBLE}
+      />
 
       <AbsoluteFill
         style={{
@@ -489,12 +488,12 @@ const PrecisionTargetPill: React.FC = () => {
   const pillX = (1 - pillSpring) * 180;
   const precisionCountProgress = interpolate(
     frame,
-    [PILL_DELAY + 18, PILL_DELAY + 38],
+    [PRECISION_COUNT_START, PRECISION_COUNT_END],
     [0, 1],
     {
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
-      easing: Easing.bezier(0.18, 0.94, 0.32, 1),
+      easing: Easing.bezier(0.18, 0.92, 0.28, 1),
     },
   );
   const precisionValue = 10 - 9.9 * precisionCountProgress;
@@ -548,16 +547,38 @@ const PrecisionTargetPill: React.FC = () => {
   );
 };
 
-const EngineeringChainLabel: React.FC = () => {
+const EngineeringChainLabel: React.FC<{
+  startFrame?: number;
+  fullyVisibleFrame?: number;
+}> = ({
+  startFrame = CHAIN_DELAY,
+  fullyVisibleFrame,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const chainSpring = spring({
-    frame: Math.max(0, frame - CHAIN_DELAY),
+    frame: Math.max(0, frame - startFrame),
     fps,
     config: softSpring,
     durationInFrames: 25,
   });
+  const syncProgress =
+    fullyVisibleFrame === undefined
+      ? null
+      : interpolate(frame, [startFrame, fullyVisibleFrame], [0, 1], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+          easing: Easing.bezier(0.22, 0.61, 0.36, 1),
+        });
+  const opacity =
+    syncProgress === null ? (chainSpring > 0.96 ? 1 : chainSpring) : syncProgress;
+  const translateY =
+    syncProgress === null
+      ? chainSpring > 0.96
+        ? 0
+        : (1 - chainSpring) * 18
+      : (1 - syncProgress) * 18;
 
   return (
     <div
@@ -567,8 +588,8 @@ const EngineeringChainLabel: React.FC = () => {
         left: 0,
         right: 0,
         textAlign: 'center',
-        opacity: chainSpring > 0.96 ? 1 : chainSpring,
-        transform: `translateY(${chainSpring > 0.96 ? 0 : (1 - chainSpring) * 18}px)`,
+        opacity,
+        transform: `translateY(${translateY}px)`,
       }}
     >
       <div
@@ -581,7 +602,7 @@ const EngineeringChainLabel: React.FC = () => {
           textTransform: 'uppercase',
         }}
       >
-        CAD · CFD · CNC
+        {'CAD \u00b7 CFD \u00b7 CNC'}
       </div>
     </div>
   );

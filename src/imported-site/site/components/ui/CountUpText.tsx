@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { interpolate, useCurrentFrame, useRemotionEnvironment, useVideoConfig } from "remotion";
 import { cn } from "@/lib/utils";
 
 export interface CountUpPreset {
@@ -122,11 +123,15 @@ export default function CountUpText({
   reserveWidth = true,
 }: CountUpTextProps) {
   const prefersReducedMotion = useReducedMotion();
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const { isRendering } = useRemotionEnvironment();
   const parsedTo = to ?? value ?? 0;
   const parsedFrom = from ?? (direction === "down" ? 1 : 0);
   const fractionDigits = Math.max(0, decimals);
   const [displayValue, setDisplayValue] = useState(parsedFrom);
   const animationStartedRef = useRef(false);
+  const renderStartFrameRef = useRef<number | null>(null);
   const formatNumber = useMemo(() => {
     if (formatter) {
       return formatter;
@@ -176,7 +181,31 @@ export default function CountUpText({
   }, [prefersReducedMotion, roundedFrom, roundedTo]);
 
   useEffect(() => {
-    if (prefersReducedMotion || !start || animationStartedRef.current) {
+    if (!isRendering) {
+      return;
+    }
+
+    if (!start) {
+      renderStartFrameRef.current = null;
+      return;
+    }
+
+    if (renderStartFrameRef.current === null) {
+      const delayFrames = Math.max(
+        0,
+        Math.round(((startDelayMs + startOffsetMs) / 1000) * fps),
+      );
+      renderStartFrameRef.current = frame + delayFrames;
+    }
+  }, [fps, frame, isRendering, start, startDelayMs, startOffsetMs]);
+
+  useEffect(() => {
+    if (
+      prefersReducedMotion ||
+      isRendering ||
+      !start ||
+      animationStartedRef.current
+    ) {
       return;
     }
 
@@ -231,7 +260,52 @@ export default function CountUpText({
     startOffsetMs,
   ]);
 
-  const activeValue = prefersReducedMotion ? roundedTo : displayValue;
+  const renderActiveValue = useMemo(() => {
+    if (!isRendering) {
+      return null;
+    }
+
+    if (!start) {
+      return roundedFrom;
+    }
+
+    const startFrame = renderStartFrameRef.current;
+    if (startFrame === null) {
+      return roundedFrom;
+    }
+
+    const durationFrames = Math.max(1, Math.round((durationMs / 1000) * fps));
+    const progress = interpolate(
+      frame,
+      [startFrame, startFrame + durationFrames],
+      [0, 1],
+      {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      },
+    );
+    const easedProgress = easeOutSuper(progress);
+    const interpolatedValue =
+      parsedFrom + (parsedTo - parsedFrom) * easedProgress;
+
+    return Number(interpolatedValue.toFixed(fractionDigits));
+  }, [
+    durationMs,
+    fps,
+    fractionDigits,
+    frame,
+    isRendering,
+    parsedFrom,
+    parsedTo,
+    roundedFrom,
+    start,
+  ]);
+
+  const activeValue = prefersReducedMotion
+    ? roundedTo
+    : isRendering
+      ? (renderActiveValue ?? roundedFrom)
+      : displayValue;
   const formattedActiveValue = `${prefix}${formatNumber(activeValue)}${suffix}`;
   const motionAriaLabel = ariaLabel ?? formattedToValue;
 

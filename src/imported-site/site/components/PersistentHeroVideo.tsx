@@ -7,7 +7,12 @@ import {
 } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { OffthreadVideo, staticFile } from "remotion";
+import {
+  Html5Video,
+  OffthreadVideo,
+  staticFile,
+  useRemotionEnvironment,
+} from "remotion";
 import {
   GLOBAL_MODAL_STATE_EVENT,
   type GlobalModalStateDetail,
@@ -17,6 +22,7 @@ import {
 export default function PersistentHeroVideo() {
   const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isRendering } = useRemotionEnvironment();
 
   const isHome = pathname === "/";
 
@@ -56,6 +62,7 @@ export default function PersistentHeroVideo() {
   }, []);
 
   const shouldShowHeroVideo = isHome && !isModalOpen;
+  const heroVideoSrc = staticFile("brand/hero.mp4");
 
   return (
     <div
@@ -92,15 +99,27 @@ export default function PersistentHeroVideo() {
             priority
           />
 
-          <OffthreadVideo
-            src={staticFile("brand/hero.mp4")}
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{
-              opacity: shouldShowHeroVideo ? 1 : 0,
-              willChange: "opacity",
-            }}
-            muted
-          />
+          {isRendering ? (
+            <OffthreadVideo
+              src={heroVideoSrc}
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                opacity: shouldShowHeroVideo ? 1 : 0,
+                willChange: "opacity",
+              }}
+              muted
+            />
+          ) : (
+            <Html5Video
+              src={heroVideoSrc}
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                opacity: shouldShowHeroVideo ? 1 : 0,
+                willChange: "opacity",
+              }}
+              muted
+            />
+          )}
         </div>
       </div>
     </div>

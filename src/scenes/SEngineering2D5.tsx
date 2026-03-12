@@ -1,11 +1,16 @@
 import React from 'react';
-import { SCENE_DURATIONS } from '../lib/timing';
 import { RealSitePageViewport } from '../components/RealSitePageViewport';
-import { getPageScrollTiming } from '../lib/sitePageScrollTiming';
+import { PAGE_SCROLL_SCENE_TIMINGS } from '../lib/sitePageScrollTiming';
 
-const SCENE_TOTAL = SCENE_DURATIONS.S07;
-const { fadeInEnd: FADE_IN_END, pushEnd: PUSH_END, scrollStart: SCROLL_START, scrollEnd: SCROLL_END, fadeOutStart: FADE_OUT_START } =
-  getPageScrollTiming(SCENE_TOTAL);
+const {
+  sceneTotal: SCENE_TOTAL,
+  fadeInEnd: FADE_IN_END,
+  pushEnd: PUSH_END,
+  scrollStart: SCROLL_START,
+  scrollEnd: SCROLL_END,
+  fadeOutStart: FADE_OUT_START,
+  maxScrollProgress: MAX_SCROLL_PROGRESS,
+} = PAGE_SCROLL_SCENE_TIMINGS.engineering;
 
 export const SEngineering2D5: React.FC = () => {
   return (
@@ -18,7 +23,7 @@ export const SEngineering2D5: React.FC = () => {
       scrollStart={SCROLL_START}
       scrollEnd={SCROLL_END}
       fadeOutStart={FADE_OUT_START}
-      maxScrollProgress={0.9}
+      maxScrollProgress={MAX_SCROLL_PROGRESS}
       driftXAmp={4.6}
       driftYAmp={2.8}
       driftXDiv={42}

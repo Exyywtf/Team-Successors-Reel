@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useCurrentFrame, useRemotionEnvironment, useVideoConfig } from "remotion";
 import {
   GLOBAL_MODAL_STATE_EVENT,
   type GlobalModalStateDetail,
@@ -78,6 +79,9 @@ function isMobileViewport(): boolean {
 
 export default function CinematicBackground() {
   const pathname = usePathname();
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const { isRendering } = useRemotionEnvironment();
   const [isMobile, setIsMobile] = useState(false);
   const [debugAtmo, setDebugAtmo] = useState(false); // Toggle via ?atmoDebug query param
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,7 +109,7 @@ export default function CinematicBackground() {
   const isDev = process.env.NODE_ENV !== "production";
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || isRendering) {
       return;
     }
 
@@ -154,20 +158,20 @@ export default function CinematicBackground() {
         pauseAtmoWorkTimerRef.current = null;
       }
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, isRendering]);
 
   useEffect(() => {
-    if (!isDev || typeof window === "undefined") {
+    if (!isDev || typeof window === "undefined" || isRendering) {
       setDebugAtmo(false);
       return;
     }
 
     const params = new URLSearchParams(window.location.search);
     setDebugAtmo(params.has("atmoDebug"));
-  }, [isDev, pathname]);
+  }, [isDev, isRendering, pathname]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || isRendering) {
       return;
     }
 
@@ -187,10 +191,10 @@ export default function CinematicBackground() {
     return () => {
       mobileQuery.removeListener(syncMobile);
     };
-  }, []);
+  }, [isRendering]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || isRendering) {
       return;
     }
 
@@ -379,10 +383,15 @@ export default function CinematicBackground() {
       setupRafTwoRef.current = null;
       fallbackTimeoutRef.current = null;
     };
-  }, [isAtmoWorkPaused, isMobile, pathname]);
+  }, [isAtmoWorkPaused, isMobile, isRendering, pathname]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || isAtmoWorkPaused || isMobileViewport()) {
+    if (
+      typeof window === "undefined" ||
+      isRendering ||
+      isAtmoWorkPaused ||
+      isMobileViewport()
+    ) {
       return;
     }
 
@@ -420,14 +429,14 @@ export default function CinematicBackground() {
       }
       movementRafRef.current = null;
     };
-  }, [isAtmoWorkPaused, isMobile, pathname]);
+  }, [isAtmoWorkPaused, isMobile, isRendering, pathname]);
 
   useEffect(() => {
-    if (isAtmoWorkPaused || isMobileViewport()) {
+    if (isRendering || isAtmoWorkPaused || isMobileViewport()) {
       return;
     }
     updateTargetNowRef.current?.(true);
-  }, [isAtmoWorkPaused, isMobile, pathname]);
+  }, [isAtmoWorkPaused, isMobile, isRendering, pathname]);
 
   if (isMobile) {
     return null;
@@ -442,7 +451,15 @@ export default function CinematicBackground() {
   const goldBlur = debugAtmo ? "0px" : isMobile ? "84px" : "96px";
   const purpleBlur = debugAtmo ? "0px" : isMobile ? "90px" : "104px";
   const pulseBlur = debugAtmo ? "0px" : isMobile ? "72px" : "64px";
-  const pulseDuration = isMobile ? "7.2s" : "6.4s";
+  const pulseDurationSeconds = isMobile ? 7.2 : 6.4;
+  const pulseDuration = `${pulseDurationSeconds}s`;
+  const renderPulseProgress = isRendering
+    ? ((frame % Math.round(pulseDurationSeconds * fps)) /
+        Math.max(1, Math.round(pulseDurationSeconds * fps)))
+    : 0;
+  const renderPulseWave = isRendering
+    ? (Math.sin(renderPulseProgress * Math.PI * 2 - Math.PI / 2) + 1) / 2
+    : 0;
 
   const overlayStyle: CSSProperties & Record<string, string | number> = {
     position: "fixed",
@@ -517,7 +534,9 @@ export default function CinematicBackground() {
     filter: `blur(${pulseBlur})`,
     opacity: debugAtmo ? 0.9 : 0.55,
     willChange: "transform, opacity",
-    transform: "translateZ(0)",
+    transform: isRendering
+      ? `translateZ(0) scale(${0.98 + renderPulseWave * 0.035})`
+      : "translateZ(0)",
     backfaceVisibility: "hidden",
     contain: "paint",
     pointerEvents: "none",
@@ -531,16 +550,24 @@ export default function CinematicBackground() {
       ? "rgba(58, 12, 163, 0.4)"
       : "radial-gradient(circle, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.38) 18%, rgba(58,12,163,0.18) 36%, rgba(5,5,5,0) 72%, rgba(5,5,5,0) 100%)",
     filter: `blur(${pulseBlur})`,
-    opacity: debugAtmo ? 0.22 : 0.14,
+    opacity: isRendering
+      ? 0.1 + renderPulseWave * 0.16
+      : debugAtmo
+        ? 0.22
+        : 0.14,
     willChange: "transform, opacity",
-    transform: "translateZ(0) scale(0.94)",
+    transform: isRendering
+      ? `translateZ(0) scale(${0.94 + renderPulseWave * 0.13})`
+      : "translateZ(0) scale(0.94)",
     backfaceVisibility: "hidden",
     contain: "paint",
     transformOrigin: "center center",
     pointerEvents: "none",
     animation: debugAtmo
       ? "none"
-      : `atmoPulseHalo ${pulseDuration} ease-in-out infinite`,
+      : isRendering
+        ? "none"
+        : `atmoPulseHalo ${pulseDuration} ease-in-out infinite`,
   };
 
   const debugBadgeStyle: CSSProperties = {

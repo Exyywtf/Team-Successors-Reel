@@ -6,7 +6,7 @@ const SITE_HERO_STAGE_BASE = {
   maxPx: 1175,
 } as const;
 
-export const HOMEPAGE_PREVIEW_HERO_HEIGHT_REDUCTION = 0.25;
+export const HOMEPAGE_PREVIEW_HERO_HEIGHT_REDUCTION = 0.16;
 
 export const HERO_REVEAL_BACKGROUND = {
   heroHeightScale: 1.5,

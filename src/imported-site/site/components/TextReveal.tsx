@@ -1,7 +1,14 @@
 "use client";
 
 import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
-import { useMemo, type ElementType, type Ref } from "react";
+import {
+  Easing,
+  interpolate,
+  useCurrentFrame,
+  useRemotionEnvironment,
+  useVideoConfig,
+} from "remotion";
+import { useMemo, type CSSProperties, type ElementType, type Ref } from "react";
 import { easeOutExpo } from "@/components/motion";
 import { cn } from "@/lib/utils";
 import { useRevealOnce } from "@/components/useRevealOnce";
@@ -17,6 +24,8 @@ interface TextRevealProps extends HTMLMotionProps<"div"> {
   priority?: boolean;
 }
 
+const renderTextEase = Easing.bezier(0.16, 1, 0.3, 1);
+
 export default function TextReveal({
   children,
   as: Component = "div",
@@ -29,17 +38,21 @@ export default function TextReveal({
   ...props
 }: TextRevealProps) {
   const prefersReducedMotion = useReducedMotion();
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const { isRendering } = useRemotionEnvironment();
   const text = typeof children === "string" ? children : children.join(" ");
 
   const items = useMemo(() => {
     if (type === "lines" && Array.isArray(children)) return children;
-    if (type === "lines" && typeof children === "string")
+    if (type === "lines" && typeof children === "string") {
       return children.split("\n");
+    }
     if (type === "words") return text.split(" ");
     if (type === "chars") return text.split("");
     return [text];
   }, [children, type, text]);
-  const { ref, isRevealed } = useRevealOnce(undefined, {
+  const { ref, isRevealed, revealedAtFrame } = useRevealOnce(undefined, {
     amount: 0.2,
     priority,
   });
@@ -80,6 +93,61 @@ export default function TextReveal({
       transition: { duration: 0.2, delay },
     },
   };
+
+  if (isRendering && !prefersReducedMotion) {
+    const delayFrames = Math.round(delay * fps);
+    const durationFrames = Math.max(1, Math.round(duration * fps));
+    const staggerFrames = Math.round(stagger * fps);
+    const baseRevealFrame = revealedAtFrame ?? frame + 9999;
+
+    return (
+      <Component className={cn("whitespace-pre-wrap", className)} {...props}>
+        <span ref={ref as Ref<HTMLSpanElement>} className="inline-block">
+          {items.map((item, index) => {
+            const itemStartFrame =
+              baseRevealFrame + delayFrames + index * staggerFrames;
+            const itemProgress = interpolate(
+              frame,
+              [itemStartFrame, itemStartFrame + durationFrames],
+              [0, 1],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: renderTextEase,
+              },
+            );
+            const opacity = itemProgress;
+            const y = interpolate(itemProgress, [0, 1], [20, 0], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: renderTextEase,
+            });
+            const blur = interpolate(itemProgress, [0, 1], [4, 0], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: renderTextEase,
+            });
+            const itemStyle: CSSProperties = {
+              opacity,
+              transform: `translate3d(0, ${y}px, 0)`,
+              filter: blur > 0.001 ? `blur(${blur}px)` : "blur(0px)",
+              willChange: "opacity, transform, filter",
+            };
+
+            return (
+              <span
+                key={index}
+                className="inline-block mr-[0.2em] last:mr-0"
+                style={itemStyle}
+              >
+                {item}
+              </span>
+            );
+          })}
+        </span>
+      </Component>
+    );
+  }
 
   return (
     <Component className={cn("whitespace-pre-wrap", className)} {...props}>
