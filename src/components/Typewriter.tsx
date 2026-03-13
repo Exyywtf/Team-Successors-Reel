@@ -17,6 +17,13 @@ export function useTypewriter(
   framesPerChar: number,
   cursorHideAfter?: number
 ): TypewriterResult {
+  if (frame < startFrame) {
+    return {
+      visible: '',
+      showCursor: false,
+    };
+  }
+
   const elapsed = Math.max(0, frame - startFrame);
   const charCount = Math.min(Math.floor(elapsed / framesPerChar), text.length);
   const doneAt = text.length * framesPerChar;
@@ -66,8 +73,11 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
     cursorHideAfter
   );
 
-  // Cursor blinks every 15 frames
-  const cursorVisible = showCursor && Math.floor(frame / 15) % 2 === 0;
+  const cursorFrame = Math.max(0, frame - startFrame);
+  const doneAt = text.length * framesPerChar;
+  const isTyping = cursorFrame < doneAt;
+  const cursorVisible =
+    showCursor && (isTyping || Math.floor(Math.max(0, cursorFrame - doneAt) / 15) % 2 === 0);
 
   return (
     <span

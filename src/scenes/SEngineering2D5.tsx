@@ -24,18 +24,34 @@ export const SEngineering2D5: React.FC = () => {
       scrollEnd={SCROLL_END}
       fadeOutStart={FADE_OUT_START}
       maxScrollProgress={MAX_SCROLL_PROGRESS}
-      driftXAmp={4.6}
-      driftYAmp={2.8}
-      driftXDiv={42}
-      driftYDiv={58}
-      tiltXStart={10}
-      tiltXEnd={3}
-      tiltYStart={-4.5}
-      tiltYEnd={1}
-      scaleStart={0.85}
-      scaleEnd={1.005}
-      entryYOffset={60}
+      driftXAmp={4.2}
+      driftYAmp={2.5}
+      driftXDiv={41}
+      driftYDiv={56}
+      tiltXStart={11.8}
+      tiltXEnd={3.8}
+      tiltYStart={-3.2}
+      tiltYEnd={-0.4}
+      scaleStart={0.79}
+      scaleEnd={0.992}
+      entryXOffset={-80}
+      entryYOffset={68}
+      entryRotateZStart={-0.45}
+      entryRotateZEnd={0.02}
+      screenOffsetX={0}
+      screenOffsetY={2}
       glowOpacityBase={0.86}
+      perspectiveDistance={1220}
+      perspectiveOrigin="50.5% 52.2%"
+      backlightWidth={980}
+      backlightHeight={680}
+      backlightOffsetX={6}
+      backlightOffsetY={12}
+      backlightBlur={92}
+      shadowWidth={820}
+      shadowHeight={226}
+      shadowOffsetY={136}
+      pushEndOverride={42}
     />
   );
 };

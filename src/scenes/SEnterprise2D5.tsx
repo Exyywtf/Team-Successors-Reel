@@ -24,18 +24,34 @@ export const SEnterprise2D5: React.FC = () => {
       scrollEnd={SCROLL_END}
       fadeOutStart={FADE_OUT_START}
       maxScrollProgress={MAX_SCROLL_PROGRESS}
-      driftXAmp={4.3}
-      driftYAmp={2.6}
-      driftXDiv={44}
-      driftYDiv={60}
-      tiltXStart={10}
-      tiltXEnd={3.2}
-      tiltYStart={-4.5}
-      tiltYEnd={1}
-      scaleStart={0.85}
-      scaleEnd={1.005}
-      entryYOffset={60}
-      glowOpacityBase={0.86}
+      driftXAmp={3.6}
+      driftYAmp={1.9}
+      driftXDiv={50}
+      driftYDiv={68}
+      tiltXStart={6.2}
+      tiltXEnd={1.7}
+      tiltYStart={8.6}
+      tiltYEnd={1.6}
+      scaleStart={0.845}
+      scaleEnd={1.006}
+      entryXOffset={134}
+      entryYOffset={42}
+      entryRotateZStart={1.35}
+      entryRotateZEnd={0.15}
+      screenOffsetX={2}
+      screenOffsetY={-1}
+      glowOpacityBase={0.76}
+      perspectiveDistance={1500}
+      perspectiveOrigin="52% 49.5%"
+      backlightWidth={960}
+      backlightHeight={648}
+      backlightOffsetX={18}
+      backlightOffsetY={-8}
+      backlightBlur={86}
+      shadowWidth={790}
+      shadowHeight={216}
+      shadowOffsetY={122}
+      pushEndOverride={46}
     />
   );
 };

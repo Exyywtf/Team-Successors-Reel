@@ -34,6 +34,7 @@ export default function ImageWithFallback({
   width,
   height,
   onError,
+  loading,
   unoptimized,
   ...props
 }: ImageWithFallbackProps) {
@@ -55,6 +56,7 @@ export default function ImageWithFallback({
       alt={alt}
       width={width}
       height={height}
+      loading={loading ?? "eager"}
       unoptimized={Boolean(unoptimized) || isDataUri}
       onError={(event) => {
         onError?.(event);

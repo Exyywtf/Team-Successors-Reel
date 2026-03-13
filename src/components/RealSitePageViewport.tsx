@@ -10,7 +10,6 @@ import {
 import { SiteAtmosphere } from './SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron } from '../lib/fonts';
-import { softSpring } from '../lib/springs';
 import {
   SITE_PREVIEW_HEIGHT,
   SITE_PREVIEW_WIDTH,
@@ -52,6 +51,22 @@ interface RealSitePageViewportProps {
   entryYOffset?: number;
   glowOpacityBase?: number;
   previewStyle?: React.CSSProperties;
+  perspectiveDistance?: number;
+  perspectiveOrigin?: string;
+  entryXOffset?: number;
+  pushEndOverride?: number;
+  entryRotateZStart?: number;
+  entryRotateZEnd?: number;
+  screenOffsetX?: number;
+  screenOffsetY?: number;
+  backlightWidth?: number;
+  backlightHeight?: number;
+  backlightOffsetX?: number;
+  backlightOffsetY?: number;
+  backlightBlur?: number;
+  shadowWidth?: number;
+  shadowHeight?: number;
+  shadowOffsetY?: number;
 }
 
 export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
@@ -77,11 +92,29 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
   entryYOffset = 60,
   glowOpacityBase = 0.84,
   previewStyle,
+  perspectiveDistance = 1850,
+  perspectiveOrigin = '50% 50%',
+  entryXOffset = 0,
+  pushEndOverride,
+  entryRotateZStart = 0,
+  entryRotateZEnd = 0,
+  screenOffsetX = 0,
+  screenOffsetY = 0,
+  backlightWidth = 1020,
+  backlightHeight = 720,
+  backlightOffsetX = 0,
+  backlightOffsetY = 0,
+  backlightBlur = 96,
+  shadowWidth = 860,
+  shadowHeight = 240,
+  shadowOffsetY = 138,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const fadeInEase = Easing.bezier(0.22, 0.61, 0.36, 1);
-  const popInEase = Easing.bezier(0.32, 0.04, 0.18, 1);
+  const popInEase = Easing.bezier(0.18, 0.82, 0.26, 1);
+  const pushEndActual = pushEndOverride ?? pushEnd;
+  const normalizedGlowOpacityBase = 0.8 + (glowOpacityBase - 0.8) * 0.35;
 
   const sceneIn = interpolate(frame, [0, fadeInEnd], [0, 1], {
     extrapolateLeft: 'clamp',
@@ -92,18 +125,53 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const cameraPush = interpolate(frame, [0, pushEnd], [0, 1], {
+  const cameraPush = interpolate(frame, [0, pushEndActual], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
     easing: popInEase,
+  });
+
+  // Spring-driven entry for premium float-in feel
+  const entrySpring = spring({
+    frame,
+    fps,
+    config: {
+      damping: 30,
+      stiffness: 120,
+      mass: 1.1,
+      overshootClamping: true,
+    },
+    durationInFrames: Math.min(pushEndActual, 24),
   });
 
   const cameraDriftX = Math.sin(frame / driftXDiv) * driftXAmp;
   const cameraDriftY = Math.cos(frame / driftYDiv) * driftYAmp;
   const tiltX = tiltXStart - cameraPush * (tiltXStart - tiltXEnd) + Math.sin(frame / 58) * 0.6;
   const tiltY = tiltYStart + cameraPush * (tiltYEnd - tiltYStart) + Math.cos(frame / 62) * 0.5;
-  const vpScale = scaleStart + cameraPush * (scaleEnd - scaleStart);
-  const vpEntryY = (1 - sceneIn) * entryYOffset;
+  const rotateZ =
+    entryRotateZEnd +
+    (1 - entrySpring) * (entryRotateZStart - entryRotateZEnd) +
+    Math.sin(frame / 74) * 0.18;
+  const vpScale = (scaleStart + cameraPush * (scaleEnd - scaleStart)) * (1 - (1 - entrySpring) * 0.04);
+  const vpEntryX = (1 - entrySpring) * entryXOffset;
+  const vpEntryY = (1 - entrySpring) * entryYOffset;
+  const badgeRevealStart = Math.max(14, Math.round(pushEndActual * 0.42));
+  const badgeRevealEnd = badgeRevealStart + 16;
+  const badgeRevealProgress = interpolate(
+    frame,
+    [badgeRevealStart, badgeRevealEnd],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    },
+  );
+  const badgeSettled = frame >= badgeRevealEnd;
+  const badgeFinalX = screenOffsetX;
+  const badgeFinalY = screenOffsetY + VP_HEIGHT / 2 + 84;
+  const badgeEntryY = Math.round((1 - badgeRevealProgress) * 18);
+  const badgeOpacity = badgeSettled ? 1 : badgeRevealProgress;
 
   const scrollProgress = interpolate(frame, [scrollStart, scrollEnd], [0, maxScrollProgress], {
     extrapolateLeft: 'clamp',
@@ -131,12 +199,6 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
       extrapolateRight: 'clamp',
     }) * glowEnvelope;
 
-  const urlBadgeSpring = spring({
-    frame: Math.max(0, frame - 18),
-    fps,
-    config: softSpring,
-    durationInFrames: 22,
-  });
   const urlFadeOut = interpolate(frame, [fadeOutStart, sceneTotal], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -144,7 +206,7 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
 
   return (
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
-      <SiteAtmosphere />
+      <SiteAtmosphere opacity={1.12} />
 
       <AbsoluteFill
         style={{
@@ -156,13 +218,26 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
       >
         <div
           style={{
-            width: 1020,
-            height: 720,
-            transform: `translateX(${cameraDriftX * 0.45}px) translateY(${cameraDriftY * 0.45}px) scale(${1 + glowLift * 0.035})`,
+            width: shadowWidth,
+            height: shadowHeight,
+            borderRadius: '50%',
+            transform: `translateX(${screenOffsetX + cameraDriftX * 0.18}px) translateY(${screenOffsetY + shadowOffsetY + cameraDriftY * 0.18}px) scale(${1 + glowLift * 0.022})`,
             background:
-              'radial-gradient(ellipse 62% 44% at 50% 50%, rgba(131,56,236,0.36) 0%, rgba(58,12,163,0.16) 36%, transparent 76%)',
-            filter: 'blur(96px)',
-            opacity: glowOpacityBase + glowLift * 0.1,
+              'radial-gradient(ellipse 58% 42% at 50% 50%, rgba(0,0,0,0.54) 0%, rgba(0,0,0,0.22) 44%, transparent 74%)',
+            filter: 'blur(52px)',
+            opacity: 0.48,
+          }}
+        />
+
+        <div
+          style={{
+            width: backlightWidth,
+            height: backlightHeight,
+            transform: `translateX(${screenOffsetX + backlightOffsetX + cameraDriftX * 0.14}px) translateY(${screenOffsetY + backlightOffsetY + cameraDriftY * 0.14}px) scale(${1 + glowLift * 0.016})`,
+            background:
+              'radial-gradient(ellipse 54% 38% at 50% 50%, rgba(131,56,236,0.22) 0%, rgba(58,12,163,0.08) 34%, transparent 74%)',
+            filter: `blur(${backlightBlur}px)`,
+            opacity: normalizedGlowOpacityBase * 0.62 + glowLift * 0.035,
           }}
         />
       </AbsoluteFill>
@@ -172,13 +247,13 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          perspective: '1850px',
-          perspectiveOrigin: '50% 50%',
+          perspective: `${perspectiveDistance}px`,
+          perspectiveOrigin,
         }}
       >
         <div
           style={{
-            transform: `translateX(${cameraDriftX}px) translateY(${vpEntryY + cameraDriftY}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${vpScale})`,
+            transform: `translateX(${screenOffsetX + vpEntryX + cameraDriftX}px) translateY(${screenOffsetY + vpEntryY + cameraDriftY}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) rotateZ(${rotateZ}deg) scale(${vpScale})`,
             transformOrigin: 'center center',
             width: VP_WIDTH,
             height: VP_HEIGHT,
@@ -232,41 +307,50 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
         </div>
       </AbsoluteFill>
 
-      <div
+      <AbsoluteFill
         style={{
-          position: 'absolute',
-          bottom: '10%',
-          left: 0,
-          right: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 10,
-          opacity: urlBadgeSpring * urlFadeOut,
+          pointerEvents: 'none',
+          zIndex: 5,
         }}
       >
         <div
           style={{
-            width: 7,
-            height: 7,
-            borderRadius: '50%',
-            background: theme.colors.gold,
-            boxShadow: '0 0 12px rgba(229,184,11,0.8)',
-          }}
-        />
-        <div
-          style={{
-            fontFamily: orbitron,
-            fontSize: 28,
-            fontWeight: 700,
-            color: theme.colors.gold,
-            letterSpacing: '0.08em',
-            textShadow: '0 0 24px rgba(229,184,11,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            opacity: badgeOpacity * urlFadeOut,
+            transform: badgeSettled
+              ? `translateX(${badgeFinalX}px) translateY(${badgeFinalY}px)`
+              : `translate3d(${badgeFinalX}px, ${badgeFinalY + badgeEntryY}px, 0)`,
           }}
         >
-          {urlLabel}
+          <div
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: theme.colors.gold,
+              boxShadow: '0 0 12px rgba(229,184,11,0.8)',
+            }}
+          />
+          <div
+            style={{
+              fontFamily: orbitron,
+              fontSize: 28,
+              fontWeight: 700,
+              color: theme.colors.gold,
+              letterSpacing: '0.08em',
+              textShadow: '0 0 24px rgba(229,184,11,0.5)',
+            }}
+          >
+            {urlLabel}
+          </div>
         </div>
-      </div>
+      </AbsoluteFill>
 
       <AbsoluteFill
         style={{ background: theme.colors.bg, opacity: 1 - sceneIn, pointerEvents: 'none' }}

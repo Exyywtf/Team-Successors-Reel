@@ -1,39 +1,59 @@
 import React from 'react';
-import { TransitionSeries, linearTiming } from '@remotion/transitions';
-import { fade } from '@remotion/transitions/fade';
-import { AbsoluteFill, Easing } from 'remotion';
-import { theme } from '../lib/theme';
-import { SCENE_DURATIONS, TRANSITION_DURATIONS } from '../lib/timing';
-import { pushBloom } from '../lib/pushBloomTransition';
-import { S01UrlIntro } from '../scenes/S01UrlIntro';
-import { S04DesktopShowcase } from '../scenes/S04DesktopShowcase';
-import { S02HeroReveal } from '../scenes/S02HeroReveal';
-import { STimeline } from '../scenes/STimeline';
-import { SEnterprise2D5 } from '../scenes/SEnterprise2D5';
-import { S05MetricsRoadmap } from '../scenes/S05MetricsRoadmap';
-import { SEngineering2D5 } from '../scenes/SEngineering2D5';
-import { S03Engineering } from '../scenes/S03Engineering';
-import { S06CtaEndFrame } from '../scenes/S06CtaEndFrame';
+import {TransitionSeries, linearTiming} from '@remotion/transitions';
+import {AbsoluteFill, Easing} from 'remotion';
+import {theme} from '../lib/theme';
+import {SCENE_DURATIONS, TRANSITION_DURATIONS} from '../lib/timing';
+import {pushBloom} from '../lib/pushBloomTransition';
+import {depthWeld, driftDissolve} from '../lib/transitions';
+import {S01UrlIntro} from '../scenes/S01UrlIntro';
+import {S04DesktopShowcase} from '../scenes/S04DesktopShowcase';
+import {S02HeroReveal} from '../scenes/S02HeroReveal';
+import {STimeline} from '../scenes/STimeline';
+import {SEnterprise2D5} from '../scenes/SEnterprise2D5';
+import {S05MetricsRoadmap} from '../scenes/S05MetricsRoadmap';
+import {SEngineering2D5} from '../scenes/SEngineering2D5';
+import {S03Engineering} from '../scenes/S03Engineering';
+import {S06CtaEndFrame} from '../scenes/S06CtaEndFrame';
 
 export const Reel: React.FC = () => {
   const softEase = Easing.bezier(0.22, 0.61, 0.36, 1);
   const cinematicEase = Easing.bezier(0.16, 0.72, 0.24, 1);
 
   return (
-    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
+    <AbsoluteFill style={{background: theme.colors.bg, overflow: 'hidden'}}>
       <TransitionSeries>
-        {/* S01 — URL Intro */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S01}>
           <S01UrlIntro />
         </TransitionSeries.Sequence>
 
-        {/* T01: URL → Desktop — push-bloom: search bar scales out, desktop pushes in */}
         <TransitionSeries.Transition
           presentation={pushBloom({
+            perspective: 2040,
+            perspectiveOrigin: '50% 49%',
+            exitTranslateX: 0,
+            exitTranslateY: -8,
+            exitTranslateZ: 170,
+            exitRotateX: 1.8,
+            exitRotateY: 0,
+            exitRotateZ: 0,
+            exitScale: 1.05,
+            enterTranslateX: 0,
+            enterTranslateY: 20,
+            enterTranslateZ: -250,
+            enterRotateX: 4.5,
+            enterRotateY: 0,
+            enterRotateZ: 0,
+            enterScale: 0.93,
             bloomColor: 'rgba(131,56,236,0.10)',
-            bloomPeak: 0.14,
-            scaleOut: 1.08,
-            scaleIn: 0.93,
+            bloomPeak: 0.05,
+            veilColor: 'rgba(8,8,12,0.12)',
+            blurMax: 4.2,
+            bloomRadius: 'ellipse 54% 42%',
+            edgeLightOpacity: 0.055,
+            overscanPx: 186,
+            supportFillColor: 'rgba(8,8,12,0.05)',
+            exitOpacityStops: [1, 0.9, 0],
+            enterOpacityStops: [0, 0.26, 0.82, 1],
           })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T01,
@@ -41,18 +61,34 @@ export const Reel: React.FC = () => {
           })}
         />
 
-        {/* S02 — Desktop Homepage Quick-Glance */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S02}>
           <S04DesktopShowcase />
         </TransitionSeries.Sequence>
 
-        {/* T02: Desktop → Hero — push-bloom with purple tint */}
         <TransitionSeries.Transition
-          presentation={pushBloom({
-            bloomColor: 'rgba(131,56,236,0.14)',
-            bloomPeak: 0.18,
-            scaleOut: 1.05,
-            scaleIn: 0.95,
+          presentation={depthWeld({
+            perspective: 1820,
+            perspectiveOrigin: '50% 53%',
+            exitTranslateX: -28,
+            exitTranslateY: -12,
+            exitTranslateZ: -150,
+            exitRotateX: 3.4,
+            exitRotateY: 6.5,
+            exitRotateZ: -0.7,
+            exitScale: 0.965,
+            enterTranslateX: 12,
+            enterTranslateY: 20,
+            enterTranslateZ: 144,
+            enterRotateX: -2.4,
+            enterRotateY: -3.2,
+            enterRotateZ: 0.4,
+            enterScale: 1.028,
+            bloomColor: 'rgba(131,56,236,0.08)',
+            bloomPeak: 0.05,
+            veilColor: 'rgba(8,8,12,0.18)',
+            blurMax: 5.8,
+            overscanPx: 170,
+            supportFillColor: 'rgba(8,8,12,0.08)',
           })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T02,
@@ -60,32 +96,59 @@ export const Reel: React.FC = () => {
           })}
         />
 
-        {/* S03 — Hero Reveal */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S03}>
           <S02HeroReveal />
         </TransitionSeries.Sequence>
 
-        {/* T03: Hero → Timeline — soft fade, elegant handoff */}
         <TransitionSeries.Transition
-          presentation={fade()}
+          presentation={driftDissolve({
+            driftDirection: 'left',
+            driftDistance: 48,
+            driftLift: 12,
+            scaleOut: 1.018,
+            scaleIn: 0.992,
+            blurMax: 4,
+            bloomColor: 'rgba(131,56,236,0.04)',
+            veilColor: 'rgba(8,8,12,0.10)',
+            rotateZ: 0.38,
+            overscanPx: 104,
+            supportFillColor: 'rgba(8,8,12,0.06)',
+          })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T03,
             easing: softEase,
           })}
         />
 
-        {/* S04 — Timeline */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S04}>
           <STimeline />
         </TransitionSeries.Sequence>
 
-        {/* T04: Timeline → Enterprise — push-bloom, camera-led */}
         <TransitionSeries.Transition
           presentation={pushBloom({
-            bloomColor: 'rgba(131,56,236,0.08)',
-            bloomPeak: 0.12,
-            scaleOut: 1.04,
-            scaleIn: 0.95,
+            perspective: 1880,
+            perspectiveOrigin: '56% 49%',
+            exitTranslateX: 36,
+            exitTranslateY: -12,
+            exitTranslateZ: 92,
+            exitRotateX: 1.8,
+            exitRotateY: 4,
+            exitRotateZ: 0.5,
+            exitScale: 1.022,
+            enterTranslateX: 132,
+            enterTranslateY: 50,
+            enterTranslateZ: -214,
+            enterRotateX: 6,
+            enterRotateY: 12,
+            enterRotateZ: 1.2,
+            enterScale: 0.92,
+            bloomColor: 'rgba(131,56,236,0.10)',
+            bloomPeak: 0.08,
+            veilColor: 'rgba(8,8,12,0.12)',
+            blurMax: 5,
+            bloomRadius: 'ellipse 56% 44%',
+            overscanPx: 190,
+            supportFillColor: 'rgba(8,8,12,0.08)',
           })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T04,
@@ -93,32 +156,70 @@ export const Reel: React.FC = () => {
           })}
         />
 
-        {/* S05 — Enterprise 2.5D Page Scroll */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S05}>
           <SEnterprise2D5 />
         </TransitionSeries.Sequence>
 
-        {/* T05: Enterprise → Metrics — fade with soft ease */}
         <TransitionSeries.Transition
-          presentation={fade()}
+          presentation={depthWeld({
+            perspective: 1700,
+            perspectiveOrigin: '52% 50%',
+            exitTranslateX: 24,
+            exitTranslateY: -12,
+            exitTranslateZ: -110,
+            exitRotateX: 2.2,
+            exitRotateY: -3,
+            exitRotateZ: 0.6,
+            exitScale: 0.972,
+            enterTranslateX: -10,
+            enterTranslateY: 18,
+            enterTranslateZ: 120,
+            enterRotateX: -2,
+            enterRotateY: 2.2,
+            enterRotateZ: -0.3,
+            enterScale: 1.022,
+            bloomColor: 'rgba(131,56,236,0.06)',
+            bloomPeak: 0.045,
+            veilColor: 'rgba(8,8,12,0.14)',
+            blurMax: 5,
+            overscanPx: 156,
+            supportFillColor: 'rgba(8,8,12,0.07)',
+          })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T05,
             easing: softEase,
           })}
         />
 
-        {/* S06 — Metrics */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S06}>
           <S05MetricsRoadmap />
         </TransitionSeries.Sequence>
 
-        {/* T06: Metrics → Engineering 2.5D — push-bloom */}
         <TransitionSeries.Transition
           presentation={pushBloom({
-            bloomColor: 'rgba(131,56,236,0.10)',
-            bloomPeak: 0.14,
-            scaleOut: 1.05,
-            scaleIn: 0.94,
+            perspective: 1620,
+            perspectiveOrigin: '51% 55%',
+            exitTranslateX: -42,
+            exitTranslateY: -18,
+            exitTranslateZ: 102,
+            exitRotateX: 2.8,
+            exitRotateY: -4.8,
+            exitRotateZ: -0.6,
+            exitScale: 1.024,
+            enterTranslateX: -88,
+            enterTranslateY: 62,
+            enterTranslateZ: -210,
+            enterRotateX: 8,
+            enterRotateY: -8,
+            enterRotateZ: -0.6,
+            enterScale: 0.915,
+            bloomColor: 'rgba(131,56,236,0.11)',
+            bloomPeak: 0.09,
+            veilColor: 'rgba(8,8,12,0.12)',
+            blurMax: 5.4,
+            bloomRadius: 'ellipse 58% 46%',
+            overscanPx: 200,
+            supportFillColor: 'rgba(8,8,12,0.08)',
           })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T06,
@@ -126,18 +227,34 @@ export const Reel: React.FC = () => {
           })}
         />
 
-        {/* S07 — Engineering 2.5D Page Scroll */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S07}>
           <SEngineering2D5 />
         </TransitionSeries.Sequence>
 
-        {/* T07: Eng 2.5D → Eng Deep-Dive — push-bloom, continuous engineering world */}
         <TransitionSeries.Transition
-          presentation={pushBloom({
-            bloomColor: 'rgba(131,56,236,0.12)',
-            bloomPeak: 0.16,
-            scaleOut: 1.04,
-            scaleIn: 0.96,
+          presentation={depthWeld({
+            perspective: 1740,
+            perspectiveOrigin: '51% 54%',
+            exitTranslateX: -20,
+            exitTranslateY: -8,
+            exitTranslateZ: 144,
+            exitRotateX: 3.6,
+            exitRotateY: -5,
+            exitRotateZ: -0.25,
+            exitScale: 1.028,
+            enterTranslateX: 12,
+            enterTranslateY: 10,
+            enterTranslateZ: -88,
+            enterRotateX: -1.1,
+            enterRotateY: 1.4,
+            enterRotateZ: 0.25,
+            enterScale: 1.008,
+            bloomColor: 'rgba(131,56,236,0.06)',
+            bloomPeak: 0.05,
+            veilColor: 'rgba(8,8,12,0.15)',
+            blurMax: 4.8,
+            overscanPx: 162,
+            supportFillColor: 'rgba(8,8,12,0.08)',
           })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T07,
@@ -145,21 +262,30 @@ export const Reel: React.FC = () => {
           })}
         />
 
-        {/* S08 — Engineering Deep-Dive */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S08}>
           <S03Engineering />
         </TransitionSeries.Sequence>
 
-        {/* T08: Eng Deep-Dive → CTA — gentle fade for final scene */}
         <TransitionSeries.Transition
-          presentation={fade()}
+          presentation={driftDissolve({
+            driftDirection: 'right',
+            driftDistance: 46,
+            driftLift: 10,
+            scaleOut: 1.016,
+            scaleIn: 0.994,
+            blurMax: 3.5,
+            bloomColor: 'rgba(131,56,236,0.03)',
+            veilColor: 'rgba(8,8,12,0.10)',
+            rotateZ: 0.28,
+            overscanPx: 92,
+            supportFillColor: 'rgba(8,8,12,0.06)',
+          })}
           timing={linearTiming({
             durationInFrames: TRANSITION_DURATIONS.T08,
             easing: softEase,
           })}
         />
 
-        {/* S09 — CTA End Frame */}
         <TransitionSeries.Sequence durationInFrames={SCENE_DURATIONS.S09}>
           <S06CtaEndFrame />
         </TransitionSeries.Sequence>

@@ -7,10 +7,16 @@ interface SiteAtmosphereProps {
   orbY?: number;
   // Overall opacity multiplier.
   opacity?: number;
+  // Scales the breathing motion of the center halo only.
+  breatheStrength?: number;
+  // Scales the opacity of the center field without affecting corner leaks.
+  centerFieldStrength?: number;
+  // Scales the animated halo layer independently from the static center field.
+  haloStrength?: number;
 }
 
 // Matches website desktop atmosphere values.
-const LEAK_OPACITY = 0.344; // clamp(0, 0.255 * 1.35, 0.55)
+const LEAK_OPACITY = 0.41;
 const HALO_SCALE_MIN = 0.94;
 const HALO_SCALE_MAX = 1.07;
 const HALO_OPACITY_MIN = 0.1;
@@ -21,6 +27,9 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
   orbX = 0,
   orbY = 0,
   opacity = 1,
+  breatheStrength = 1,
+  centerFieldStrength = 1,
+  haloStrength = 1,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -31,11 +40,11 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
   const mirroredT = cycle <= 0.5 ? cycle * 2 : (1 - cycle) * 2;
   const breatheT = Easing.inOut(Easing.ease)(mirroredT);
 
-  const haloScale = interpolate(breatheT, [0, 1], [HALO_SCALE_MIN, HALO_SCALE_MAX], {
+  const animatedHaloScale = interpolate(breatheT, [0, 1], [HALO_SCALE_MIN, HALO_SCALE_MAX], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const haloOpacity = interpolate(
+  const animatedHaloOpacity = interpolate(
     breatheT,
     [0, 1],
     [HALO_OPACITY_MIN, HALO_OPACITY_MAX],
@@ -44,6 +53,12 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       extrapolateRight: 'clamp',
     }
   );
+  const neutralHaloOpacity = (HALO_OPACITY_MIN + HALO_OPACITY_MAX) / 2;
+  const haloScale = 1 + (animatedHaloScale - 1) * breatheStrength;
+  const haloOpacity =
+    (neutralHaloOpacity + (animatedHaloOpacity - neutralHaloOpacity) * breatheStrength) *
+    haloStrength;
+  const centerFieldOpacity = 0.55 * centerFieldStrength;
 
   // Shared drift keeps atmosphere motion identical everywhere it is used.
   const sharedDriftX = Math.sin(frame / 90) * 0.18;
@@ -63,14 +78,14 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       <div
         style={{
           position: 'absolute',
-          top: '-18vh',
-          right: '-12vw',
-          width: '40vw',
-          height: '40vw',
+          top: '-15vh',
+          right: '-10vw',
+          width: '46vw',
+          height: '46vw',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle at 70% 30%, rgba(255,214,2,0.34) 0%, rgba(255,214,2,0.16) 26%, rgba(255,214,2,0.00) 62%)',
-          filter: 'blur(96px)',
+            'radial-gradient(circle at 70% 30%, rgba(255,214,2,0.4) 0%, rgba(255,214,2,0.22) 28%, rgba(255,214,2,0.00) 64%)',
+          filter: 'blur(108px)',
           opacity: LEAK_OPACITY,
         }}
       />
@@ -78,14 +93,14 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       <div
         style={{
           position: 'absolute',
-          bottom: '-10vh',
-          left: '-10vw',
-          width: '36vw',
-          height: '36vw',
+          bottom: '-8vh',
+          left: '-8vw',
+          width: '42vw',
+          height: '42vw',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle at 30% 70%, rgba(122,77,255,0.38) 0%, rgba(122,77,255,0.2) 22%, rgba(122,77,255,0) 62%)',
-          filter: 'blur(90px)',
+            'radial-gradient(circle at 30% 70%, rgba(122,77,255,0.44) 0%, rgba(122,77,255,0.24) 24%, rgba(122,77,255,0) 64%)',
+          filter: 'blur(104px)',
           opacity: LEAK_OPACITY,
         }}
       />
@@ -102,7 +117,7 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
           background:
             'radial-gradient(circle, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.38) 18%, rgba(58,12,163,0.14) 36%, rgba(5,5,5,0) 72%, rgba(5,5,5,0) 100%)',
           filter: 'blur(64px)',
-          opacity: 0.55,
+          opacity: centerFieldOpacity,
         }}
       />
 

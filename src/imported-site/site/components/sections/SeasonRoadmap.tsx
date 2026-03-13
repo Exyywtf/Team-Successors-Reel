@@ -67,6 +67,7 @@ export default function SeasonRoadmap() {
                     src={ROW_2_IMAGE_SRC}
                     alt="Season roadmap timeline row 2"
                     fill
+                    loading="eager"
                     sizes={TIMELINE_IMAGE_SIZES}
                     className="pointer-events-none object-contain object-center origin-center select-none"
                   />

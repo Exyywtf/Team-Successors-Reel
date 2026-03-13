@@ -48,6 +48,13 @@ const CHAIN_SYNC_FULLY_VISIBLE =
 const CHAIN_SYNC_START = CHAIN_SYNC_FULLY_VISIBLE - CHAIN_SYNC_APPEAR_DURATION;
 const PRECISION_COUNT_START = PILL_DELAY + 21;
 const PRECISION_COUNT_END = PILL_DELAY + 43;
+const ENGINEERING_STAGE_WIDTH = 1080;
+const ENGINEERING_STAGE_HEIGHT = 1920;
+const ENGINEERING_CARD_WIDTH = 488;
+const ENGINEERING_LEFT_CARD_X = 24;
+const ENGINEERING_RIGHT_CARD_X = 24;
+const ENGINEERING_LEFT_CARD_Y = '-54%';
+const ENGINEERING_RIGHT_CARD_Y = '-46%';
 
 const getEngineeringGalleryItem = (id: string): GalleryItem => {
   const item = siteContent.engineeringPage.gallery.find((entry) => entry.id === id);
@@ -83,6 +90,70 @@ export const S03Engineering: React.FC = () => {
 
   return <EngineeringBetaCardsIntro />;
 };
+
+const EngineeringStage: React.FC<React.PropsWithChildren> = ({children}) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      width: ENGINEERING_STAGE_WIDTH,
+      height: ENGINEERING_STAGE_HEIGHT,
+      transform: 'translate(-50%, -50%)',
+      transformOrigin: 'center center',
+      overflow: 'visible',
+      pointerEvents: 'none',
+    }}
+  >
+    {children}
+  </div>
+);
+
+const EngineeringCardLayer: React.FC<{
+  side: 'left' | 'right';
+  translateX: number;
+  translateY: number;
+  scale: number;
+  opacity: number;
+  blurPx?: number;
+  children: React.ReactNode;
+}> = ({side, translateX, translateY, scale, opacity, blurPx = 0, children}) => (
+  <div
+    style={{
+      position: 'absolute',
+      top: '50%',
+      width: ENGINEERING_CARD_WIDTH,
+      left: side === 'left' ? ENGINEERING_LEFT_CARD_X : undefined,
+      right: side === 'right' ? ENGINEERING_RIGHT_CARD_X : undefined,
+      transform:
+        side === 'left'
+          ? `translateY(calc(${ENGINEERING_LEFT_CARD_Y} + ${translateY}px)) translateX(${translateX}px) scale(${scale})`
+          : `translateY(calc(${ENGINEERING_RIGHT_CARD_Y} + ${translateY}px)) translateX(${translateX}px) scale(${scale})`,
+      opacity,
+      filter: blurPx > 0 ? `blur(${blurPx}px)` : undefined,
+      overflow: 'visible',
+    }}
+  >
+    {children}
+  </div>
+);
+
+const EngineeringStageOverlay: React.FC<React.PropsWithChildren> = ({children}) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      width: ENGINEERING_STAGE_WIDTH,
+      height: ENGINEERING_STAGE_HEIGHT,
+      transform: 'translate(-50%, -50%)',
+      overflow: 'visible',
+      pointerEvents: 'none',
+    }}
+  >
+    {children}
+  </div>
+);
 
 const EngineeringCfdBackgroundIntro: React.FC = () => {
   const frame = useCurrentFrame();
@@ -181,8 +252,10 @@ const EngineeringCfdBackgroundIntro: React.FC = () => {
           }}
         />
 
-        <AnalyzeOverlay />
-        <PrecisionTargetPill />
+        <EngineeringStageOverlay>
+          <AnalyzeOverlay />
+          <PrecisionTargetPill />
+        </EngineeringStageOverlay>
       </AbsoluteFill>
 
       <AbsoluteFill style={{ opacity: cardsIn }}>
@@ -193,47 +266,42 @@ const EngineeringCfdBackgroundIntro: React.FC = () => {
           }}
         />
 
-        <div
-          style={{
-            position: 'absolute',
-            left: 24,
-            top: '50%',
-            width: 488,
-            transform: `translateY(calc(-54% + ${card1Y}px)) translateX(${card1X}px) scale(${card1Scale})`,
-            opacity: card1Spring,
-          }}
-        >
-          <LegacyEngineeringCard
-            imageSrc={staticFile('assets/concept-alpha-render.png')}
-            stageLabel="01 / Design"
-            title="Design"
-            subtitle="Fusion 360 CAD â€” precision geometry built for real-world manufacturing."
-            tiltDeg={3}
-            imageHeight={320}
-          />
-        </div>
+        <EngineeringStage>
+          <EngineeringCardLayer
+            side="left"
+            translateX={card1X}
+            translateY={card1Y}
+            scale={card1Scale}
+            opacity={card1Spring}
+          >
+            <LegacyEngineeringCard
+              imageSrc={staticFile('assets/concept-alpha-render.png')}
+              stageLabel="01 / Design"
+              title="Design"
+              subtitle="Fusion 360 CAD - precision geometry built for real-world manufacturing."
+              tiltDeg={3}
+              imageHeight={320}
+            />
+          </EngineeringCardLayer>
 
-        <div
-          style={{
-            position: 'absolute',
-            right: 24,
-            top: '50%',
-            width: 488,
-            transform: `translateY(calc(-46% + ${card2Y}px)) translateX(${card2X}px) scale(${card2Scale})`,
-            opacity: card2Spring,
-          }}
-        >
-          <LegacyEngineeringCard
-            imageSrc={staticFile('assets/concept-beta-cfd.jpeg')}
-            stageLabel="02 / Validate"
-            title="Validate"
-            subtitle="ANSYS CFD simulation â€” aerodynamic precision at 0.1mm tolerance."
-            tiltDeg={-3}
-            imageHeight={320}
-          />
-        </div>
-
-        <EngineeringChainLabel />
+          <EngineeringCardLayer
+            side="right"
+            translateX={card2X}
+            translateY={card2Y}
+            scale={card2Scale}
+            opacity={card2Spring}
+          >
+            <LegacyEngineeringCard
+              imageSrc={staticFile('assets/concept-beta-cfd.jpeg')}
+              stageLabel="02 / Validate"
+              title="Validate"
+              subtitle="ANSYS CFD simulation - aerodynamic precision at 0.1mm tolerance."
+              tiltDeg={-3}
+              imageHeight={320}
+            />
+          </EngineeringCardLayer>
+          <EngineeringChainLabel />
+        </EngineeringStage>
       </AbsoluteFill>
 
       <AbsoluteFill
@@ -341,68 +409,58 @@ const EngineeringBetaCardsIntro: React.FC = () => {
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden', opacity: sceneIn }}>
       <SiteAtmosphere />
 
-      <div
-        style={{
-          position: 'absolute',
-          left: 24,
-          top: '50%',
-          width: 488,
-          transform: `translateY(calc(-54% + ${betaLeftY}px)) translateX(${betaLeftX}px) scale(${betaLeftScale})`,
-          opacity: betaLeftOpacity,
-          filter: `blur(${betaPhaseBlur}px)`,
-        }}
-      >
-        <EngineeringGalleryCard item={BETA_RENDER_CARD} tiltDeg={3} />
-      </div>
+      <EngineeringStage>
+        <EngineeringCardLayer
+          side="left"
+          translateX={betaLeftX}
+          translateY={betaLeftY}
+          scale={betaLeftScale}
+          opacity={betaLeftOpacity}
+          blurPx={betaPhaseBlur}
+        >
+          <EngineeringGalleryCard item={BETA_RENDER_CARD} tiltDeg={3} />
+        </EngineeringCardLayer>
 
-      <div
-        style={{
-          position: 'absolute',
-          right: 24,
-          top: '50%',
-          width: 488,
-          transform: `translateY(calc(-46% + ${betaRightY}px)) translateX(${betaRightX}px) scale(${betaRightScale})`,
-          opacity: betaRightOpacity,
-          filter: `blur(${betaPhaseBlur}px)`,
-        }}
-      >
-        <EngineeringGalleryCard item={BETA_CFD_CARD} tiltDeg={-3} />
-      </div>
+        <EngineeringCardLayer
+          side="right"
+          translateX={betaRightX}
+          translateY={betaRightY}
+          scale={betaRightScale}
+          opacity={betaRightOpacity}
+          blurPx={betaPhaseBlur}
+        >
+          <EngineeringGalleryCard item={BETA_CFD_CARD} tiltDeg={-3} />
+        </EngineeringCardLayer>
 
-      <div
-        style={{
-          position: 'absolute',
-          left: 24,
-          top: '50%',
-          width: 488,
-          transform: `translateY(calc(-54% + ${gammaLeftY}px)) translateX(${gammaLeftX}px) scale(${gammaLeftScale})`,
-          opacity: gammaLeftOpacity,
-          filter: `blur(${gammaPhaseBlur}px)`,
-        }}
-      >
-        <EngineeringGalleryCard item={GAMMA_RENDER_CARD} tiltDeg={3} />
-      </div>
+        <EngineeringCardLayer
+          side="left"
+          translateX={gammaLeftX}
+          translateY={gammaLeftY}
+          scale={gammaLeftScale}
+          opacity={gammaLeftOpacity}
+          blurPx={gammaPhaseBlur}
+        >
+          <EngineeringGalleryCard item={GAMMA_RENDER_CARD} tiltDeg={3} />
+        </EngineeringCardLayer>
 
-      <div
-        style={{
-          position: 'absolute',
-          right: 24,
-          top: '50%',
-          width: 488,
-          transform: `translateY(calc(-46% + ${gammaRightY}px)) translateX(${gammaRightX}px) scale(${gammaRightScale})`,
-          opacity: gammaRightOpacity,
-          filter: `blur(${gammaPhaseBlur}px)`,
-        }}
-      >
-        <EngineeringGalleryCard item={GAMMA_CFD_CARD} tiltDeg={-3} />
-      </div>
+        <EngineeringCardLayer
+          side="right"
+          translateX={gammaRightX}
+          translateY={gammaRightY}
+          scale={gammaRightScale}
+          opacity={gammaRightOpacity}
+          blurPx={gammaPhaseBlur}
+        >
+          <EngineeringGalleryCard item={GAMMA_CFD_CARD} tiltDeg={-3} />
+        </EngineeringCardLayer>
 
-      <AnalyzeOverlay />
-      <PrecisionTargetPill />
-      <EngineeringChainLabel
-        startFrame={CHAIN_SYNC_START}
-        fullyVisibleFrame={CHAIN_SYNC_FULLY_VISIBLE}
-      />
+        <AnalyzeOverlay />
+        <PrecisionTargetPill />
+        <EngineeringChainLabel
+          startFrame={CHAIN_SYNC_START}
+          fullyVisibleFrame={CHAIN_SYNC_FULLY_VISIBLE}
+        />
+      </EngineeringStage>
 
       <AbsoluteFill
         style={{
