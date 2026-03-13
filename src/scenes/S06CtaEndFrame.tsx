@@ -27,6 +27,7 @@ import { heroSpring, softSpring } from '../lib/springs';
 const SCENE_FADE_IN = 12;
 const LOGO_DELAY = 6;
 const CTA_DELAY = 22;
+const CTA_REVEAL_END = CTA_DELAY + 18;
 const URL_DELAY = 36;
 const SPONSORS_DELAY = 46;
 const FADE_TO_BLACK_START = 93;
@@ -60,10 +61,17 @@ export const S06CtaEndFrame: React.FC = () => {
   const ctaSpring = spring({
     frame: Math.max(0, frame - CTA_DELAY),
     fps,
-    config: heroSpring,
-    durationInFrames: 32,
+    config: {
+      ...heroSpring,
+      overshootClamping: true,
+    },
+    durationInFrames: CTA_REVEAL_END - CTA_DELAY,
   });
-  const ctaY = (1 - ctaSpring) * 45;
+  const ctaRawY = Math.max(0, (1 - ctaSpring) * 38);
+  const ctaSettled = ctaRawY <= 0.25;
+  const ctaY = ctaSettled ? 0 : ctaRawY;
+  const ctaOpacity = ctaSettled ? 1 : Math.min(ctaSpring, 1);
+  const ctaRuleWidth = ctaSettled ? 180 : Math.round(Math.min(ctaSpring, 1) * 180);
 
   // ── URL ───────────────────────────────────────────────────────────────────
   const urlSpring = spring({
@@ -107,9 +115,10 @@ export const S06CtaEndFrame: React.FC = () => {
             color: theme.colors.gold,
             letterSpacing: '0.26em',
             textTransform: 'uppercase',
-            opacity: Math.min(ctaSpring * 1.1, 1),
+            opacity: ctaOpacity,
             marginBottom: 20,
             textAlign: 'center',
+            transform: 'none',
           }}
         >
           Partnership Opportunity
@@ -125,8 +134,8 @@ export const S06CtaEndFrame: React.FC = () => {
             letterSpacing: '-0.01em',
             textAlign: 'center',
             lineHeight: 1.08,
-            transform: `translateY(${ctaY}px)`,
-            opacity: Math.min(ctaSpring * 1.1, 1),
+            transform: ctaSettled ? 'none' : `translate3d(0, ${ctaY}px, 0)`,
+            opacity: ctaOpacity,
             textShadow: `0 0 40px rgba(131,56,236,0.35)`,
             maxWidth: 900,
           }}
@@ -137,11 +146,12 @@ export const S06CtaEndFrame: React.FC = () => {
         {/* Gold rule */}
         <div
           style={{
-            width: `${Math.min(ctaSpring * 1.05, 1) * 180}px`,
+            width: `${ctaRuleWidth}px`,
             height: 2,
             background: `linear-gradient(90deg, transparent, ${theme.colors.gold}, transparent)`,
             margin: '26px auto',
-            opacity: Math.min(ctaSpring * 1.1, 1),
+            opacity: ctaOpacity,
+            transform: 'none',
           }}
         />
 

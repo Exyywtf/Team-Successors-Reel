@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
   spring,
   useCurrentFrame,
@@ -8,7 +9,7 @@ import {
 } from 'remotion';
 import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { orbitron, montserrat } from '../lib/fonts';
-import { snappySpring, softSpring } from '../lib/springs';
+import { snappySpring } from '../lib/springs';
 import { theme } from '../lib/theme';
 
 const SCENE_TOTAL = 84;
@@ -54,12 +55,19 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
     durationInFrames: 24,
   });
 
-  const subtitle = spring({
-    frame: Math.max(0, frame - (start + 7)),
-    fps,
-    config: softSpring,
-    durationInFrames: 20,
-  });
+  const subtitleRevealStart = start + 7;
+  const subtitleRevealEnd = subtitleRevealStart + 16;
+  const subtitleProgress = interpolate(
+    frame,
+    [subtitleRevealStart, subtitleRevealEnd],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    },
+  );
+  const subtitleSettled = frame >= subtitleRevealEnd;
 
   const countProgress = spring({
     frame: Math.max(0, frame - (start + 2)),
@@ -68,14 +76,17 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
     durationInFrames: 26,
   });
 
-  const depthY = pop > 0.96 ? 0 : (1 - pop) * 64;
-  const depthScale = pop > 0.96 ? 1 : 0.78 + pop * 0.22;
+  const depthY = (1 - pop) * 64;
+  const depthScale = 0.78 + pop * 0.22;
   const glowColor =
     glow === 'gold'
       ? 'rgba(229,184,11,0.55), 0 0 140px rgba(229,184,11,0.2)'
       : 'rgba(131,56,236,0.55), 0 0 160px rgba(131,56,236,0.2)';
   const ruleColor = glow === 'gold' ? theme.colors.gold : theme.colors.purpleSoft;
   const valueText = countToText(valueTarget * countProgress, unit);
+  const subtitleY = subtitleSettled ? 0 : Math.round((1 - subtitleProgress) * 14);
+  const subtitleOpacity = subtitleSettled ? 1 : subtitleProgress;
+  const ruleWidth = subtitleSettled ? 220 : Math.round(subtitleProgress * 220);
 
   return (
     <AbsoluteFill style={{ opacity }}>
@@ -107,12 +118,13 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
 
         <div
           style={{
-            width: `${subtitle > 0.96 ? 220 : subtitle * 220}px`,
+            width: `${ruleWidth}px`,
             height: 2,
             marginTop: 26,
             marginBottom: 24,
-            opacity: subtitle > 0.96 ? 1 : subtitle,
+            opacity: subtitleOpacity,
             background: `linear-gradient(90deg, transparent, ${ruleColor}, transparent)`,
+            transform: 'none',
           }}
         />
 
@@ -125,8 +137,8 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
             textAlign: 'center',
-            transform: `translateY(${subtitle > 0.96 ? 0 : (1 - subtitle) * 16}px)`,
-            opacity: subtitle > 0.96 ? 1 : subtitle,
+            transform: subtitleSettled ? 'none' : `translate3d(0, ${subtitleY}px, 0)`,
+            opacity: subtitleOpacity,
           }}
         >
           {label}

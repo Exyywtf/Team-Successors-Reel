@@ -1,27 +1,30 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
   spring,
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import { LogoMark } from '../components/LogoMark';
-import { theme } from '../lib/theme';
-import { orbitron, montserrat } from '../lib/fonts';
-import { heroSpring, softSpring } from '../lib/springs';
+import {LogoMark} from '../components/LogoMark';
+import {theme} from '../lib/theme';
+import {orbitron, montserrat} from '../lib/fonts';
+import {heroSpring, softSpring} from '../lib/springs';
 import {
   HERO_REVEAL_BACKGROUND,
   buildHeroStagePreviewStyle,
 } from '../lib/siteHeroTuning';
-import { SitePreviewProvider } from '../imported-site/site/runtime/SitePreviewContext';
+import {SitePreviewProvider} from '../imported-site/site/runtime/SitePreviewContext';
 import CinematicBackground from '../imported-site/site/components/layout/CinematicBackground';
 import PersistentHeroVideo from '../imported-site/site/components/PersistentHeroVideo';
 
 const SCENE_FADE_IN_END = 16;
 const LOGO_DELAY = 18;
 const EYEBROW_DELAY = 26;
+const EYEBROW_REVEAL_END = EYEBROW_DELAY + 18;
 const HEADLINE_DELAY = 30;
+const HEADLINE_REVEAL_END = HEADLINE_DELAY + 20;
 const LINE1_DELAY = 44;
 const LINE2_DELAY = 58;
 const SUBLINE_DELAY = 84;
@@ -37,7 +40,8 @@ const heroBackgroundStyle: React.CSSProperties = {
 
 export const S02HeroReveal: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const {fps} = useVideoConfig();
+  const settleEase = Easing.bezier(0.22, 1, 0.36, 1);
 
   const sceneIn = interpolate(frame, [0, SCENE_FADE_IN_END], [0, 1], {
     extrapolateLeft: 'clamp',
@@ -47,8 +51,9 @@ export const S02HeroReveal: React.FC = () => {
   const sceneOut = interpolate(frame, [FADE_OUT_START, SCENE_TOTAL], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: (t) => t * t * (3 - 2 * t),
   });
-  const sceneOpacity = Math.min(sceneIn, sceneOut);
+  const fadeToBlack = 1 - sceneOut;
   const backgroundFadeOut = interpolate(
     frame,
     [HERO_REVEAL_BACKGROUND.fadeStartFrame, SCENE_TOTAL],
@@ -59,20 +64,31 @@ export const S02HeroReveal: React.FC = () => {
     },
   );
 
-  const eyebrowSpring = spring({
-    frame: Math.max(0, frame - EYEBROW_DELAY),
-    fps,
-    config: softSpring,
-    durationInFrames: 30,
-  });
+  const eyebrowRevealProgress = interpolate(
+    frame,
+    [EYEBROW_DELAY, EYEBROW_REVEAL_END],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: settleEase,
+    },
+  );
+  const eyebrowSettled = frame >= EYEBROW_REVEAL_END;
 
   const headlineSpring = spring({
     frame: Math.max(0, frame - HEADLINE_DELAY),
     fps,
-    config: heroSpring,
-    durationInFrames: 40,
+    config: {
+      ...heroSpring,
+      overshootClamping: true,
+    },
+    durationInFrames: HEADLINE_REVEAL_END - HEADLINE_DELAY,
   });
-  const headlineY = headlineSpring > 0.96 ? 0 : (1 - headlineSpring) * 70;
+  const headlineRawY = Math.max(0, (1 - headlineSpring) * 70);
+  const headlineSettled = headlineRawY <= 0.35;
+  const headlineY = headlineSettled ? 0 : headlineRawY;
+  const headlineOpacity = headlineSettled ? 1 : Math.min(headlineSpring, 1);
 
   const dividerSpring = spring({
     frame: Math.max(0, frame - HEADLINE_DELAY - 8),
@@ -87,7 +103,7 @@ export const S02HeroReveal: React.FC = () => {
     config: heroSpring,
     durationInFrames: 35,
   });
-  const line1X = line1Spring > 0.96 ? 0 : (1 - line1Spring) * -90;
+  const line1X = (1 - line1Spring) * -90;
 
   const line2Spring = spring({
     frame: Math.max(0, frame - LINE2_DELAY),
@@ -95,7 +111,7 @@ export const S02HeroReveal: React.FC = () => {
     config: heroSpring,
     durationInFrames: 35,
   });
-  const line2X = line2Spring > 0.96 ? 0 : (1 - line2Spring) * 90;
+  const line2X = (1 - line2Spring) * 90;
 
   const sublineSpring = spring({
     frame: Math.max(0, frame - SUBLINE_DELAY),
@@ -105,13 +121,15 @@ export const S02HeroReveal: React.FC = () => {
   });
 
   return (
-    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneOpacity, background: theme.colors.bg }}>
+    <AbsoluteFill style={{overflow: 'hidden', background: theme.colors.bg}}>
       <SitePreviewProvider pathname="/">
-        <AbsoluteFill style={{
-          ...heroBackgroundStyle,
-          opacity: backgroundFadeOut,
-          transform: 'scale(1.01)',
-        }}>
+        <AbsoluteFill
+          style={{
+            ...heroBackgroundStyle,
+            opacity: backgroundFadeOut,
+            transform: 'scale(1.01)',
+          }}
+        >
           <CinematicBackground />
           <PersistentHeroVideo />
         </AbsoluteFill>
@@ -127,7 +145,7 @@ export const S02HeroReveal: React.FC = () => {
           zIndex: 2,
         }}
       >
-        <div style={{ marginBottom: 32 }}>
+        <div style={{marginBottom: 32}}>
           <LogoMark size={120} delay={LOGO_DELAY} />
         </div>
 
@@ -139,10 +157,11 @@ export const S02HeroReveal: React.FC = () => {
             color: theme.colors.gold,
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
-            opacity: eyebrowSpring,
+            opacity: eyebrowSettled ? 1 : eyebrowRevealProgress,
             marginBottom: 18,
             textAlign: 'center',
             textShadow: '0 2px 20px rgba(0,0,0,0.5)',
+            transform: 'none',
           }}
         >
           F1 in Schools · UAE
@@ -157,9 +176,10 @@ export const S02HeroReveal: React.FC = () => {
             letterSpacing: '-0.02em',
             lineHeight: 0.9,
             textAlign: 'center',
-            transform: `translateY(${headlineY}px)`,
-            opacity: headlineSpring > 0.96 ? 1 : headlineSpring,
-            textShadow: '0 0 60px rgba(131,56,236,0.5), 0 0 120px rgba(131,56,236,0.22)',
+            transform: headlineSettled ? 'none' : `translate3d(0, ${headlineY}px, 0)`,
+            opacity: headlineOpacity,
+            textShadow:
+              '0 0 60px rgba(131,56,236,0.5), 0 0 120px rgba(131,56,236,0.22)',
           }}
         >
           Successors
@@ -167,7 +187,7 @@ export const S02HeroReveal: React.FC = () => {
 
         <div
           style={{
-            width: `${dividerSpring > 0.96 ? 220 : dividerSpring * 220}px`,
+            width: `${Math.min(dividerSpring, 1) * 220}px`,
             height: 2,
             background: `linear-gradient(90deg, transparent, ${theme.colors.gold}, transparent)`,
             margin: '24px auto',
@@ -184,7 +204,7 @@ export const S02HeroReveal: React.FC = () => {
             letterSpacing: '0.03em',
             textAlign: 'center',
             transform: `translateX(${line1X}px)`,
-            opacity: line1Spring > 0.96 ? 1 : line1Spring,
+            opacity: Math.min(line1Spring, 1),
             lineHeight: 1.2,
             textShadow: '0 4px 24px rgba(0,0,0,0.42)',
           }}
@@ -201,7 +221,7 @@ export const S02HeroReveal: React.FC = () => {
             letterSpacing: '0.03em',
             textAlign: 'center',
             transform: `translateX(${line2X}px)`,
-            opacity: line2Spring > 0.96 ? 1 : line2Spring,
+            opacity: Math.min(line2Spring, 1),
             marginTop: 8,
             lineHeight: 1.2,
             textShadow: '0 4px 24px rgba(0,0,0,0.42)',
@@ -229,6 +249,22 @@ export const S02HeroReveal: React.FC = () => {
           {'\n'}Sponsor-ready outcomes.
         </div>
       </AbsoluteFill>
+
+      <AbsoluteFill
+        style={{
+          background: theme.colors.bg,
+          opacity: 1 - sceneIn,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <AbsoluteFill
+        style={{
+          background: theme.colors.bg,
+          opacity: fadeToBlack,
+          pointerEvents: 'none',
+        }}
+      />
     </AbsoluteFill>
   );
 };

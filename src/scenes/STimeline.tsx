@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   Img,
   staticFile,
   useCurrentFrame,
@@ -11,7 +12,7 @@ import {
 import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron } from '../lib/fonts';
-import { heroSpring, softSpring } from '../lib/springs';
+import { heroSpring } from '../lib/springs';
 
 // Scene duration: 72 frames (2.4s), global start: 306
 //
@@ -29,12 +30,14 @@ const FADE_IN_END = 10;
 const TIMELINE_IN = 6;
 const NATIONALS_DELAY = 18;
 const UAE_DELAY = 28;
+const UAE_REVEAL_END = UAE_DELAY + 18;
 const FADE_OUT_START = 60;
 const SCENE_TOTAL = 72;
 
 export const STimeline: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const settleEase = Easing.bezier(0.22, 1, 0.36, 1);
 
   // ── Scene envelope ─────────────────────────────────────────────────────────
   const sceneIn = interpolate(frame, [0, FADE_IN_END], [0, 1], {
@@ -66,13 +69,14 @@ export const STimeline: React.FC = () => {
   });
   const nationalsY = nationalsSpring > 0.96 ? 0 : (1 - nationalsSpring) * 52;
 
-  // ── "UAE" gold accent ──────────────────────────────────────────────────────
-  const uaeSpring = spring({
-    frame: Math.max(0, frame - UAE_DELAY),
-    fps,
-    config: softSpring,
-    durationInFrames: 22,
+  // ── "UAE" gold accent — eased interpolate, no spring snap ─────────────────
+  const uaeProgress = interpolate(frame, [UAE_DELAY, UAE_REVEAL_END], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: settleEase,
   });
+  const uaeSettled = frame >= UAE_REVEAL_END;
+  const uaeY = uaeSettled ? 0 : Math.round((1 - uaeProgress) * 18);
 
   return (
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
@@ -152,8 +156,8 @@ export const STimeline: React.FC = () => {
         {/* ── "UAE · Q2 Race Window" gold accent ── */}
         <div
           style={{
-            opacity: uaeSpring > 0.96 ? 1 : uaeSpring,
-            transform: `translateY(${uaeSpring > 0.96 ? 0 : (1 - uaeSpring) * 22}px)`,
+            opacity: uaeSettled ? 1 : uaeProgress,
+            transform: uaeSettled ? 'none' : `translate3d(0, ${uaeY}px, 0)`,
             textAlign: 'center',
             marginTop: 4,
           }}
