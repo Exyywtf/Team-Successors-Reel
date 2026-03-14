@@ -9,7 +9,6 @@ import {
   spring,
   interpolate,
 } from 'remotion';
-import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron } from '../lib/fonts';
 import { heroSpring } from '../lib/springs';
@@ -20,7 +19,7 @@ import { heroSpring } from '../lib/springs';
 // properly framed above the "Nationals" title. Not used as zoomed background.
 //
 // Timeline:
-//   f00–10  — scene fades in via overlay, SiteAtmosphere bg breathes
+//   f00–10  — scene fades in via overlay
 //   f06     — timeline image slides down from above, scale 1.06→1.00
 //   f18     — "Nationals" slams up from below
 //   f28     — "UAE · Q2 Race Window" gold accent fades up
@@ -79,9 +78,7 @@ export const STimeline: React.FC = () => {
   const uaeY = uaeSettled ? 0 : Math.round((1 - uaeProgress) * 18);
 
   return (
-    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
-      {/* Website-faithful atmosphere — same system as S01 / S06 */}
-      <SiteAtmosphere />
+    <AbsoluteFill style={{ overflow: 'hidden' }}>
 
       {/* ── Content column — flex centered, with camera breathing ── */}
       <AbsoluteFill

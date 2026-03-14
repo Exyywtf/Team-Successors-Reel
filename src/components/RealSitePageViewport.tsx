@@ -7,7 +7,6 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import { SiteAtmosphere } from './SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron } from '../lib/fonts';
 import {
@@ -114,6 +113,11 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
   const popInEase = Easing.bezier(0.18, 0.82, 0.26, 1);
   const pushEndActual = pushEndOverride ?? pushEnd;
   const normalizedGlowOpacityBase = 0.8 + (glowOpacityBase - 0.8) * 0.35;
+  const sceneIn = interpolate(frame, [0, fadeInEnd], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.bezier(0.22, 0.61, 0.36, 1),
+  });
 
   const fadeToBlack = interpolate(frame, [fadeOutStart, sceneTotal], [0, 1], {
     extrapolateLeft: 'clamp',
@@ -199,9 +203,7 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
   });
 
   return (
-    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
-      <SiteAtmosphere />
-
+    <AbsoluteFill style={{ overflow: 'hidden' }}>
       <AbsoluteFill
         style={{
           display: 'flex',
@@ -345,6 +347,10 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
           </div>
         </div>
       </AbsoluteFill>
+
+      <AbsoluteFill
+        style={{ background: theme.colors.bg, opacity: 1 - sceneIn, pointerEvents: 'none' }}
+      />
 
       <AbsoluteFill
         style={{ background: theme.colors.bg, opacity: fadeToBlack, pointerEvents: 'none' }}

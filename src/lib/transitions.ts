@@ -145,11 +145,12 @@ const DriftDissolvePresentation: React.FC<
   );
 
   if (isExiting) {
-    const opacity = interpolate(p, [0, 0.82, 1], [1, 0.82, 0], clampRange);
+    // Smoother exit: start fading earlier for gentler crossover
+    const opacity = interpolate(p, [0, 0.7, 1], [1, 0.82, 0], clampRange);
     const blur = interpolate(
       p,
-      [0, 0.6, 1],
-      [0, blurMax * 0.24, blurMax],
+      [0, 0.52, 1],
+      [0, blurMax * 0.2, blurMax],
       clampRange,
     );
     const transform = buildTransform({
@@ -180,7 +181,7 @@ const DriftDissolvePresentation: React.FC<
               opacity,
               transform,
               transformOrigin: 'center center',
-              filter: `blur(${blur}px) brightness(${interpolate(p, [0, 1], [1, 0.92], clampRange)})`,
+              filter: `blur(${blur}px) brightness(${interpolate(p, [0, 1], [1, 0.93], clampRange)})`,
             },
           },
           children,
@@ -189,11 +190,12 @@ const DriftDissolvePresentation: React.FC<
     );
   }
 
-  const opacity = interpolate(p, [0, 0.22, 0.64, 1], [0, 0.34, 0.76, 1], clampRange);
+  // Smoother enter: earlier onset, gentler ramp, reduced initial blur
+  const opacity = interpolate(p, [0, 0.16, 0.56, 1], [0, 0.36, 0.8, 1], clampRange);
   const blur = interpolate(
     p,
-    [0, 0.48, 1],
-    [blurMax * 0.68, blurMax * 0.16, 0],
+    [0, 0.42, 1],
+    [blurMax * 0.52, blurMax * 0.12, 0],
     clampRange,
   );
   const transform = buildTransform({
@@ -316,11 +318,12 @@ const DepthWeldPresentation: React.FC<
   );
 
   if (isExiting) {
-    const opacity = interpolate(p, [0, 0.84, 1], [1, 0.8, 0], clampRange);
+    // Smoother exit: start fading earlier for gentler crossover
+    const opacity = interpolate(p, [0, 0.72, 1], [1, 0.82, 0], clampRange);
     const blur = interpolate(
       p,
-      [0, 0.56, 1],
-      [0, blurMax * 0.28, blurMax],
+      [0, 0.5, 1],
+      [0, blurMax * 0.22, blurMax],
       clampRange,
     );
     const transform = buildTransform({
@@ -362,7 +365,7 @@ const DepthWeldPresentation: React.FC<
               transform,
               transformOrigin: 'center center',
               transformStyle: 'preserve-3d',
-              filter: `blur(${blur}px) brightness(${interpolate(p, [0, 1], [1, 0.93], clampRange)})`,
+              filter: `blur(${blur}px) brightness(${interpolate(p, [0, 1], [1, 0.94], clampRange)})`,
             },
           },
           children,
@@ -371,11 +374,12 @@ const DepthWeldPresentation: React.FC<
     );
   }
 
-  const opacity = interpolate(p, [0, 0.18, 0.58, 1], [0, 0.32, 0.78, 1], clampRange);
+  // Smoother enter: earlier onset, gentler ramp, reduced initial blur
+  const opacity = interpolate(p, [0, 0.14, 0.52, 1], [0, 0.34, 0.8, 1], clampRange);
   const blur = interpolate(
     p,
-    [0, 0.46, 1],
-    [blurMax * 0.7, blurMax * 0.18, 0],
+    [0, 0.4, 1],
+    [blurMax * 0.54, blurMax * 0.14, 0],
     clampRange,
   );
   const transform = buildTransform({

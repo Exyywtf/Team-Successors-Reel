@@ -97,8 +97,13 @@ const PushBloomPresentation: React.FC<
     enterRotateY = -16,
     enterRotateZ = -2.8,
     enterScale = 0.9,
+    bloomColor = 'rgba(131,56,236,0.08)',
+    bloomPeak = 0.06,
+    veilColor = 'rgba(8,8,12,0.14)',
     blurMax = 6,
+    bloomRadius = 'ellipse 62% 46%',
     overscanPx = 180,
+    supportFillColor = 'rgba(8,8,12,0.07)',
     exitOpacityStops = [1, 0.82, 0],
     enterOpacityStops = [0, 0.38, 0.78, 1],
   } = passedProps;
@@ -106,12 +111,33 @@ const PushBloomPresentation: React.FC<
   const p = presentationProgress;
   const isExiting = presentationDirection === 'exiting';
 
+  // Subtle overlay opacities — acts as transition glue, not a visible effect
+  const bloomOpacity = interpolate(
+    p,
+    [0, 0.24, 0.56, 1],
+    [0, bloomPeak * 0.24, bloomPeak * 0.85, 0],
+    clampRange,
+  );
+  const veilOpacity = interpolate(
+    p,
+    [0, 0.26, 0.76, 1],
+    [0, 0.015, 0.045, 0],
+    clampRange,
+  );
+  const supportFillOpacity = interpolate(
+    p,
+    [0, 0.28, 0.78, 1],
+    [0, 0.015, 0.045, 0],
+    clampRange,
+  );
+
   if (isExiting) {
-    const opacity = interpolate(p, [0, 0.84, 1], exitOpacityStops, clampRange);
+    // Softer exit: start fading earlier, more gradual drop
+    const opacity = interpolate(p, [0, 0.72, 1], exitOpacityStops, clampRange);
     const blur = interpolate(
       p,
-      [0, 0.54, 1],
-      [0, blurMax * 0.28, blurMax],
+      [0, 0.48, 1],
+      [0, blurMax * 0.22, blurMax],
       clampRange,
     );
     const transform = buildTransform({
@@ -134,6 +160,29 @@ const PushBloomPresentation: React.FC<
           overflow: 'hidden',
         },
       },
+      // Subtle overlay layers — support fill, bloom, veil
+      React.createElement(AbsoluteFill, {
+        style: {
+          background: supportFillColor,
+          opacity: supportFillOpacity,
+          pointerEvents: 'none',
+        },
+      }),
+      React.createElement(AbsoluteFill, {
+        style: {
+          background: `radial-gradient(${bloomRadius} at 50% 50%, ${bloomColor}, transparent 72%)`,
+          opacity: bloomOpacity * 0.7,
+          mixBlendMode: 'screen',
+          pointerEvents: 'none',
+        },
+      }),
+      React.createElement(AbsoluteFill, {
+        style: {
+          background: `radial-gradient(ellipse 80% 66% at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 54%, ${veilColor} 100%)`,
+          opacity: veilOpacity,
+          pointerEvents: 'none',
+        },
+      }),
       React.createElement(
         'div',
         {style: centeredOverscanPlaneStyle(overscanPx)},
@@ -155,11 +204,12 @@ const PushBloomPresentation: React.FC<
     );
   }
 
-  const opacity = interpolate(p, [0, 0.18, 0.54, 1], enterOpacityStops, clampRange);
+  // Smoother enter: earlier fade-in onset, gentler blur ramp
+  const opacity = interpolate(p, [0, 0.12, 0.48, 1], enterOpacityStops, clampRange);
   const blur = interpolate(
     p,
-    [0, 0.42, 1],
-    [blurMax * 0.72, blurMax * 0.18, 0],
+    [0, 0.38, 1],
+    [blurMax * 0.5, blurMax * 0.12, 0],
     clampRange,
   );
   const transform = buildTransform({
@@ -182,6 +232,29 @@ const PushBloomPresentation: React.FC<
           overflow: 'hidden',
         },
       },
+    // Subtle overlay layers — support fill, bloom, veil
+    React.createElement(AbsoluteFill, {
+      style: {
+        background: supportFillColor,
+        opacity: supportFillOpacity,
+        pointerEvents: 'none',
+      },
+    }),
+    React.createElement(AbsoluteFill, {
+      style: {
+        background: `radial-gradient(${bloomRadius} at 50% 50%, ${bloomColor}, transparent 72%)`,
+        opacity: bloomOpacity * 0.6,
+        mixBlendMode: 'screen',
+        pointerEvents: 'none',
+      },
+    }),
+    React.createElement(AbsoluteFill, {
+      style: {
+        background: `radial-gradient(ellipse 80% 66% at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 54%, ${veilColor} 100%)`,
+        opacity: veilOpacity * 0.65,
+        pointerEvents: 'none',
+      },
+    }),
     React.createElement(
       'div',
       {style: centeredOverscanPlaneStyle(overscanPx)},

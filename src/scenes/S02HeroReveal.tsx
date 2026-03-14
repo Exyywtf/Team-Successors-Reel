@@ -8,7 +8,6 @@ import {
   useVideoConfig,
 } from 'remotion';
 import {LogoMark} from '../components/LogoMark';
-import {SiteAtmosphere} from '../components/SiteAtmosphere';
 import {theme} from '../lib/theme';
 import {orbitron, montserrat} from '../lib/fonts';
 import {heroSpring, softSpring} from '../lib/springs';
@@ -121,8 +120,7 @@ export const S02HeroReveal: React.FC = () => {
   });
 
   return (
-    <AbsoluteFill style={{overflow: 'hidden', background: theme.colors.bg}}>
-      <SiteAtmosphere />
+    <AbsoluteFill style={{overflow: 'hidden'}}>
 
       <SitePreviewProvider pathname="/">
         <AbsoluteFill

@@ -8,7 +8,6 @@ import {
   useVideoConfig,
 } from 'remotion';
 import {SearchBubble} from '../components/SearchBubble';
-import {SiteAtmosphere} from '../components/SiteAtmosphere';
 import {TypewriterText} from '../components/Typewriter';
 import {orbitron} from '../lib/fonts';
 import {theme} from '../lib/theme';
@@ -188,13 +187,9 @@ export const S01UrlIntro: React.FC = () => {
   return (
     <AbsoluteFill
       style={{
-        background: theme.colors.bg,
         overflow: 'hidden',
       }}
       >
-      <AbsoluteFill style={{pointerEvents: 'none'}}>
-        <SiteAtmosphere />
-      </AbsoluteFill>
 
       <AbsoluteFill
         style={{

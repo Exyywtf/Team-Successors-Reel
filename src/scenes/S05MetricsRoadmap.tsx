@@ -7,7 +7,6 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { orbitron, montserrat } from '../lib/fonts';
 import { snappySpring } from '../lib/springs';
 import { theme } from '../lib/theme';
@@ -267,8 +266,7 @@ export const S05MetricsRoadmap: React.FC = () => {
   });
 
   return (
-    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
-      <SiteAtmosphere />
+    <AbsoluteFill style={{ overflow: 'hidden' }}>
 
       <MetricBeat
         frame={frame}

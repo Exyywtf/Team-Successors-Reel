@@ -9,7 +9,6 @@ import {
   interpolate,
 } from 'remotion';
 import { LogoMark } from '../components/LogoMark';
-import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { heroSpring, softSpring } from '../lib/springs';
@@ -84,12 +83,9 @@ export const S06CtaEndFrame: React.FC = () => {
   return (
     <AbsoluteFill
       style={{
-        background: theme.colors.bg,
         overflow: 'hidden',
       }}
     >
-      {/* Website-faithful atmosphere (same treatment as S01) */}
-      <SiteAtmosphere />
 
       {/* ── Content column — with camera breathing ── */}
       <AbsoluteFill

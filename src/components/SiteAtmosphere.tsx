@@ -16,7 +16,7 @@ interface SiteAtmosphereProps {
 }
 
 // Matches website desktop atmosphere values.
-const LEAK_OPACITY = 0.41;
+const LEAK_OPACITY = 0.32;
 const HALO_SCALE_MIN = 0.94;
 const HALO_SCALE_MAX = 1.07;
 const HALO_OPACITY_MIN = 0.1;
@@ -78,14 +78,14 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       <div
         style={{
           position: 'absolute',
-          top: '-15vh',
-          right: '-10vw',
-          width: '46vw',
-          height: '46vw',
+          top: '-18vh',
+          right: '-14vw',
+          width: '34vw',
+          height: '34vw',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle at 70% 30%, rgba(255,214,2,0.4) 0%, rgba(255,214,2,0.22) 28%, rgba(255,214,2,0.00) 64%)',
-          filter: 'blur(108px)',
+            'radial-gradient(circle at 70% 30%, rgba(255,214,2,0.32) 0%, rgba(255,214,2,0.16) 28%, rgba(255,214,2,0.00) 64%)',
+          filter: 'blur(96px)',
           opacity: LEAK_OPACITY,
         }}
       />
@@ -93,14 +93,14 @@ export const SiteAtmosphere: React.FC<SiteAtmosphereProps> = ({
       <div
         style={{
           position: 'absolute',
-          bottom: '-8vh',
-          left: '-8vw',
-          width: '42vw',
-          height: '42vw',
+          bottom: '-14vh',
+          left: '-14vw',
+          width: '34vw',
+          height: '34vw',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle at 30% 70%, rgba(122,77,255,0.44) 0%, rgba(122,77,255,0.24) 24%, rgba(122,77,255,0) 64%)',
-          filter: 'blur(104px)',
+            'radial-gradient(circle at 30% 70%, rgba(122,77,255,0.34) 0%, rgba(122,77,255,0.18) 24%, rgba(122,77,255,0) 64%)',
+          filter: 'blur(96px)',
           opacity: LEAK_OPACITY,
         }}
       />

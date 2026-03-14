@@ -12,7 +12,6 @@ import {
 import { theme } from '../lib/theme';
 import { orbitron, montserrat } from '../lib/fonts';
 import { glideSpring, heroSpring, softSpring } from '../lib/springs';
-import { SiteAtmosphere } from '../components/SiteAtmosphere';
 import { ENGINEERING_INTRO_MODE } from '../lib/engineeringIntroConfig';
 import Card from '../imported-site/site/components/ui/Card';
 import ImageWithFallback from '../imported-site/site/components/ImageWithFallback';
@@ -212,7 +211,7 @@ const EngineeringCfdBackgroundIntro: React.FC = () => {
   const card2Scale = 0.95 + card2Spring * 0.05;
 
   return (
-    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden', opacity: sceneIn }}>
+    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneIn }}>
       <AbsoluteFill style={{ opacity: cfdOpacity }}>
         <AbsoluteFill
           style={{
@@ -406,8 +405,7 @@ const EngineeringBetaCardsIntro: React.FC = () => {
   });
 
   return (
-    <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden', opacity: sceneIn }}>
-      <SiteAtmosphere />
+    <AbsoluteFill style={{ overflow: 'hidden', opacity: sceneIn }}>
 
       <EngineeringStage>
         <EngineeringCardLayer
