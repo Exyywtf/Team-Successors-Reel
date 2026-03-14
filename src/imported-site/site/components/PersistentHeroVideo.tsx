@@ -108,6 +108,7 @@ export default function PersistentHeroVideo() {
                 willChange: "opacity",
               }}
               muted
+              toneMapped={false}
             />
           ) : (
             <Html5Video
@@ -118,6 +119,7 @@ export default function PersistentHeroVideo() {
                 willChange: "opacity",
               }}
               muted
+              pauseWhenBuffering
             />
           )}
         </div>

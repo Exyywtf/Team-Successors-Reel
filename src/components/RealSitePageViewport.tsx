@@ -291,6 +291,8 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
                 height: SITE_PREVIEW_HEIGHT,
                 transform: `scale(${CONTENT_SCALE})`,
                 transformOrigin: 'top left',
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
               }}
             >
               <SitePreviewPage

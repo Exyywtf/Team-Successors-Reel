@@ -111,7 +111,7 @@ export function useRevealOnce(
     }
 
     setIsRevealed(true);
-    setRevealedAtFrame(frame);
+    setRevealedAtFrame(0);
   }, [amountThreshold, disabled, frame, isRendering, isRevealed]);
 
   return { ref: elementRef, isRevealed, revealedAtFrame };

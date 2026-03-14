@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import Card from "@/components/ui/Card";
 import ImageWithFallback from "@/components/ImageWithFallback";
@@ -9,7 +9,7 @@ import {
   TEAM_MEDIA_FADE_STYLE,
   TEAM_MEDIA_OVERLAY_SIZE_CLASS,
 } from "@/components/media/teamMediaStyles";
-import { easeOutExpo, navIndicatorTransition } from "@/components/motion";
+import { navIndicatorTransition } from "@/components/motion";
 import { navItemClasses } from "@/components/uiClasses";
 import type { GalleryItem } from "@/types/content";
 
@@ -101,14 +101,12 @@ export default function GalleryGrid({
         </div>
       ) : null}
 
-      <motion.div
+      <div
         role="tabpanel"
         id="gallery-panel"
         aria-labelledby={`gallery-tab-${activeTab.toLowerCase()}`}
-        layout={!prefersReducedMotion}
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
-        <AnimatePresence initial={false} mode="popLayout">
           {filteredItems.map((item) => {
             const usesEngineeringMedia = Boolean(
               item.mediaType && item.mediaSrc,
@@ -120,35 +118,8 @@ export default function GalleryGrid({
               usesEngineeringMedia && item.mediaType === "background";
 
             return (
-              <motion.div
+              <div
                 key={item.id}
-                layoutId={`eng-card-${item.id}`} // Enables shared element transitions if needed
-                layout={!prefersReducedMotion} // Animate layout changes (reordering/filtering)
-                initial={
-                  prefersReducedMotion
-                    ? false
-                    : { opacity: 0, y: 10, scale: 0.99 }
-                }
-                animate={
-                  prefersReducedMotion
-                    ? { opacity: 1 }
-                    : { opacity: 1, y: 0, scale: 1 }
-                }
-                exit={
-                  prefersReducedMotion
-                    ? { opacity: 0 }
-                    : { opacity: 0, y: -8, scale: 0.99 }
-                }
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0.12 }
-                    : {
-                        opacity: { duration: 0.2, ease: easeOutExpo },
-                        y: { duration: 0.2, ease: easeOutExpo },
-                        scale: { duration: 0.2, ease: easeOutExpo },
-                        layout: { duration: 0.32, ease: easeOutExpo },
-                      }
-                }
               >
                 <Card className="overflow-hidden">
                   <div
@@ -213,11 +184,10 @@ export default function GalleryGrid({
                     <p className="mt-2 text-sm muted-copy">{item.caption}</p>
                   </div>
                 </Card>
-              </motion.div>
+              </div>
             );
           })}
-        </AnimatePresence>
-      </motion.div>
+      </div>
     </div>
   );
 }

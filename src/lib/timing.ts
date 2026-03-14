@@ -14,7 +14,7 @@ export const SCENE_DURATIONS = {
   S05: PAGE_SCROLL_SCENE_TIMINGS.enterprise.sceneTotal,
   S06: 97,
   S07: PAGE_SCROLL_SCENE_TIMINGS.engineering.sceneTotal,
-  S08: 180,
+  S08: 191,
   S09: 108,
 } as const;
 

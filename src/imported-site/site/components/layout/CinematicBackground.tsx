@@ -81,7 +81,8 @@ export default function CinematicBackground() {
   const pathname = usePathname();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const { isRendering } = useRemotionEnvironment();
+  const { isRendering, isStudio } = useRemotionEnvironment();
+  const skipInReel = isRendering || isStudio;
   const [isMobile, setIsMobile] = useState(false);
   const [debugAtmo, setDebugAtmo] = useState(false); // Toggle via ?atmoDebug query param
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -438,7 +439,9 @@ export default function CinematicBackground() {
     updateTargetNowRef.current?.(true);
   }, [isAtmoWorkPaused, isMobile, isRendering, pathname]);
 
-  if (isMobile) {
+  // Skip entirely in reel context — the reel has its own SiteAtmosphere component.
+  // This avoids heavy blur filters and RAF loops inside every 2.5D browser viewport.
+  if (skipInReel || isMobile) {
     return null;
   }
 

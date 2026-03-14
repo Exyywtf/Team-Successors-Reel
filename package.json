@@ -9,6 +9,7 @@
     "@remotion/cli": "4.0.434",
     "@remotion/google-fonts": "4.0.434",
     "@remotion/light-leaks": "4.0.434",
+    "@remotion/media": "4.0.434",
     "@remotion/tailwind-v4": "4.0.434",
     "@remotion/transitions": "4.0.434",
     "clsx": "2.1.1",

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {TransitionSeries, linearTiming} from '@remotion/transitions';
-import {AbsoluteFill, Easing} from 'remotion';
+import {Audio} from '@remotion/media';
+import {AbsoluteFill, Easing, interpolate, Sequence, staticFile} from 'remotion';
 import {theme} from '../lib/theme';
 import {SCENE_DURATIONS, TRANSITION_DURATIONS} from '../lib/timing';
+import {buildSfxTimeline} from '../lib/sfxTimeline';
 import {SiteAtmosphere} from '../components/SiteAtmosphere';
 import {pushBloom} from '../lib/pushBloomTransition';
 import {depthWeld, driftDissolve} from '../lib/transitions';
@@ -19,6 +21,7 @@ import {S06CtaEndFrame} from '../scenes/S06CtaEndFrame';
 export const Reel: React.FC = () => {
   const softEase = Easing.bezier(0.22, 0.61, 0.36, 1);
   const cinematicEase = Easing.bezier(0.16, 0.72, 0.24, 1);
+  const sfxCues = useMemo(() => buildSfxTimeline(), []);
 
   return (
     <AbsoluteFill style={{background: theme.colors.bg, overflow: 'hidden'}}>
@@ -292,6 +295,38 @@ export const Reel: React.FC = () => {
           <S06CtaEndFrame />
         </TransitionSeries.Sequence>
       </TransitionSeries>
+
+      {sfxCues.map((cue, i) => (
+        <Sequence key={i} from={cue.frame} durationInFrames={cue.durationFrames}>
+          <Audio
+            src={staticFile(cue.src)}
+            volume={(f) => {
+              let v = cue.volume;
+              if (cue.fadeInFrames) {
+                v = Math.min(
+                  v,
+                  interpolate(f, [0, cue.fadeInFrames], [0, cue.volume], {
+                    extrapolateRight: 'clamp',
+                  }),
+                );
+              }
+              if (cue.fadeOutFrames && cue.durationFrames) {
+                v = Math.min(
+                  v,
+                  interpolate(
+                    f,
+                    [cue.durationFrames - cue.fadeOutFrames, cue.durationFrames],
+                    [cue.volume, 0],
+                    {extrapolateLeft: 'clamp'},
+                  ),
+                );
+              }
+              return v;
+            }}
+            playbackRate={cue.playbackRate}
+          />
+        </Sequence>
+      ))}
     </AbsoluteFill>
   );
 };
