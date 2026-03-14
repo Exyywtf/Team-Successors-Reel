@@ -131,14 +131,14 @@ export const S01UrlIntro: React.FC = () => {
     interpolate(pushProgress, [0, 1], [0, 8], clamp);
   const objectDriftX = Math.sin(frame / 56) * 1.8 * Math.max(0.35, lifeProgress);
   const objectDriftY = Math.cos(frame / 70) * 1.2 * Math.max(0.4, lifeProgress);
-  const glowTrackX = objectDriftX * 0.78;
+  const glowTrackX = objectDriftX;
   const glowTrackY = objectY + objectDriftY;
   const haloScale =
     0.985 +
     interpolate(shellMorphProgress, [0, 1], [0, 0.02], clamp) +
     Math.sin(frame / 28) * 0.005 * lifeProgress;
-  const rearBloomWidth = shellWidth + interpolate(shellMorphProgress, [0, 1], [196, 312], clamp);
-  const rearBloomHeight = shellHeight + interpolate(shellMorphProgress, [0, 1], [156, 228], clamp);
+  const rearBloomWidth = shellWidth + interpolate(shellMorphProgress, [0, 1], [140, 220], clamp);
+  const rearBloomHeight = shellHeight + interpolate(shellMorphProgress, [0, 1], [96, 136], clamp);
   const rearBloomRadius = shellRadius + interpolate(shellMorphProgress, [0, 1], [86, 132], clamp);
   const rearBloomScale =
     0.96 +
@@ -146,10 +146,10 @@ export const S01UrlIntro: React.FC = () => {
     Math.sin(frame / 30) * 0.004 * lifeProgress;
   const rearBloomOpacity =
     entryFade *
-    interpolate(frame, [0, 12, URL_INTRO_MORPH_END], [0.12, 0.14, 0.2], clamp) *
+    interpolate(frame, [0, 12, URL_INTRO_MORPH_END], [0.08, 0.1, 0.14], clamp) *
     interpolate(pushProgress, [0, 1], [1, 1.04], clamp);
   const nearHaloWidth = shellWidth + interpolate(shellMorphProgress, [0, 1], [26, 46], clamp);
-  const nearHaloHeight = shellHeight + interpolate(shellMorphProgress, [0, 1], [20, 32], clamp);
+  const nearHaloHeight = shellHeight + interpolate(shellMorphProgress, [0, 1], [14, 22], clamp);
   const nearHaloRadius = shellRadius + interpolate(shellMorphProgress, [0, 1], [10, 16], clamp);
   const nearHaloOpacity = entryFade * interpolate(
     frame,
@@ -158,7 +158,7 @@ export const S01UrlIntro: React.FC = () => {
     clamp,
   );
   const rearHaloWidth = shellWidth + interpolate(shellMorphProgress, [0, 1], [76, 126], clamp);
-  const rearHaloHeight = shellHeight + interpolate(shellMorphProgress, [0, 1], [58, 88], clamp);
+  const rearHaloHeight = shellHeight + interpolate(shellMorphProgress, [0, 1], [44, 64], clamp);
   const rearHaloRadius = shellRadius + interpolate(shellMorphProgress, [0, 1], [28, 42], clamp);
   const rearHaloOpacity = entryFade * interpolate(
     frame,
@@ -191,9 +191,9 @@ export const S01UrlIntro: React.FC = () => {
         background: theme.colors.bg,
         overflow: 'hidden',
       }}
-    >
+      >
       <AbsoluteFill style={{pointerEvents: 'none'}}>
-        <SiteAtmosphere opacity={1.12} />
+        <SiteAtmosphere />
       </AbsoluteFill>
 
       <AbsoluteFill
@@ -214,7 +214,7 @@ export const S01UrlIntro: React.FC = () => {
             transform: `translateX(${glowTrackX}px) translateY(${glowTrackY}px) scale(${rearBloomScale})`,
             background:
               'radial-gradient(ellipse at 50% 50%, rgba(131,56,236,0.18) 0%, rgba(131,56,236,0.10) 34%, rgba(76,29,149,0.05) 56%, rgba(131,56,236,0) 78%)',
-            filter: 'blur(68px)',
+            filter: 'blur(52px)',
             opacity: rearBloomOpacity,
             mixBlendMode: 'screen',
           }}

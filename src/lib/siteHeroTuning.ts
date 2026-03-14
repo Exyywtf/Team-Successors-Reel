@@ -9,7 +9,7 @@ const SITE_HERO_STAGE_BASE = {
 export const HOMEPAGE_PREVIEW_HERO_HEIGHT_REDUCTION = 0.25;
 
 export const HERO_REVEAL_BACKGROUND = {
-  heroHeightScale: 1.5,
+  heroHeightScale: 1.55,
   fadeStartFrame: 140,
   fadeEndOpacity: 0.72,
 } as const;

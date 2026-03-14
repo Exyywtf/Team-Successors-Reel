@@ -111,16 +111,10 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const fadeInEase = Easing.bezier(0.22, 0.61, 0.36, 1);
   const popInEase = Easing.bezier(0.18, 0.82, 0.26, 1);
   const pushEndActual = pushEndOverride ?? pushEnd;
   const normalizedGlowOpacityBase = 0.8 + (glowOpacityBase - 0.8) * 0.35;
 
-  const sceneIn = interpolate(frame, [0, fadeInEnd], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: fadeInEase,
-  });
   const fadeToBlack = interpolate(frame, [fadeOutStart, sceneTotal], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -206,7 +200,7 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
 
   return (
     <AbsoluteFill style={{ background: theme.colors.bg, overflow: 'hidden' }}>
-      <SiteAtmosphere opacity={1.12} />
+      <SiteAtmosphere />
 
       <AbsoluteFill
         style={{
@@ -352,9 +346,6 @@ export const RealSitePageViewport: React.FC<RealSitePageViewportProps> = ({
         </div>
       </AbsoluteFill>
 
-      <AbsoluteFill
-        style={{ background: theme.colors.bg, opacity: 1 - sceneIn, pointerEvents: 'none' }}
-      />
       <AbsoluteFill
         style={{ background: theme.colors.bg, opacity: fadeToBlack, pointerEvents: 'none' }}
       />

@@ -12,7 +12,7 @@ export const SCENE_DURATIONS = {
   S03: 156,
   S04: 72,
   S05: PAGE_SCROLL_SCENE_TIMINGS.enterprise.sceneTotal,
-  S06: 84,
+  S06: 97,
   S07: PAGE_SCROLL_SCENE_TIMINGS.engineering.sceneTotal,
   S08: 180,
   S09: 108,

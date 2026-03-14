@@ -8,6 +8,7 @@ import {
   useVideoConfig,
 } from 'remotion';
 import {LogoMark} from '../components/LogoMark';
+import {SiteAtmosphere} from '../components/SiteAtmosphere';
 import {theme} from '../lib/theme';
 import {orbitron, montserrat} from '../lib/fonts';
 import {heroSpring, softSpring} from '../lib/springs';
@@ -16,7 +17,6 @@ import {
   buildHeroStagePreviewStyle,
 } from '../lib/siteHeroTuning';
 import {SitePreviewProvider} from '../imported-site/site/runtime/SitePreviewContext';
-import CinematicBackground from '../imported-site/site/components/layout/CinematicBackground';
 import PersistentHeroVideo from '../imported-site/site/components/PersistentHeroVideo';
 
 const SCENE_FADE_IN_END = 16;
@@ -122,6 +122,8 @@ export const S02HeroReveal: React.FC = () => {
 
   return (
     <AbsoluteFill style={{overflow: 'hidden', background: theme.colors.bg}}>
+      <SiteAtmosphere />
+
       <SitePreviewProvider pathname="/">
         <AbsoluteFill
           style={{
@@ -130,7 +132,6 @@ export const S02HeroReveal: React.FC = () => {
             transform: 'scale(1.01)',
           }}
         >
-          <CinematicBackground />
           <PersistentHeroVideo />
         </AbsoluteFill>
       </SitePreviewProvider>

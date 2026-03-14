@@ -77,62 +77,6 @@ const centeredOverscanPlaneStyle = (
   transformOrigin: 'center center',
 });
 
-const TransitionSupportLayers: React.FC<{
-  supportFillColor: string;
-  supportFillOpacity: number;
-  bloomColor: string;
-  bloomOpacity: number;
-  bloomRadius: string;
-  edgeLightOpacity: number;
-  veilColor: string;
-  veilOpacity: number;
-}> = ({
-  supportFillColor,
-  supportFillOpacity,
-  bloomColor,
-  bloomOpacity,
-  bloomRadius,
-  edgeLightOpacity,
-  veilColor,
-  veilOpacity,
-}) => {
-  return React.createElement(
-    React.Fragment,
-    null,
-    React.createElement(AbsoluteFill, {
-      style: {
-        background: supportFillColor,
-        opacity: supportFillOpacity,
-        pointerEvents: 'none',
-      },
-    }),
-    React.createElement(AbsoluteFill, {
-      style: {
-        background: `radial-gradient(${bloomRadius} at 50% 48%, ${bloomColor}, transparent 72%)`,
-        opacity: bloomOpacity,
-        mixBlendMode: 'screen',
-        pointerEvents: 'none',
-      },
-    }),
-    React.createElement(AbsoluteFill, {
-      style: {
-        background:
-          'linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.05) 18%, rgba(255,255,255,0.0) 42%)',
-        opacity: edgeLightOpacity,
-        mixBlendMode: 'screen',
-        pointerEvents: 'none',
-      },
-    }),
-    React.createElement(AbsoluteFill, {
-      style: {
-        background: `radial-gradient(ellipse 80% 66% at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, ${veilColor} 100%)`,
-        opacity: veilOpacity,
-        pointerEvents: 'none',
-      },
-    }),
-  );
-};
-
 const PushBloomPresentation: React.FC<
   TransitionPresentationComponentProps<PushBloomProps>
 > = ({children, presentationDirection, presentationProgress, passedProps}) => {
@@ -153,38 +97,14 @@ const PushBloomPresentation: React.FC<
     enterRotateY = -16,
     enterRotateZ = -2.8,
     enterScale = 0.9,
-    bloomColor = 'rgba(131,56,236,0.12)',
-    bloomPeak = 0.1,
-    veilColor = 'rgba(8,8,12,0.12)',
     blurMax = 6,
-    bloomRadius = 'ellipse 58% 46%',
-    edgeLightOpacity = 0.08,
     overscanPx = 180,
-    supportFillColor = 'rgba(8,8,12,0.08)',
     exitOpacityStops = [1, 0.82, 0],
     enterOpacityStops = [0, 0.38, 0.78, 1],
   } = passedProps;
 
   const p = presentationProgress;
   const isExiting = presentationDirection === 'exiting';
-  const bloomOpacity = interpolate(
-    p,
-    [0, 0.26, 0.62, 1],
-    [0, bloomPeak * 0.35, bloomPeak, 0],
-    clampRange,
-  );
-  const veilOpacity = interpolate(
-    p,
-    [0, 0.26, 0.72, 1],
-    [0, 0.01, 0.06, 0],
-    clampRange,
-  );
-  const supportFillOpacity = interpolate(
-    p,
-    [0, 0.3, 0.72, 1],
-    [0, 0.02, 0.07, 0],
-    clampRange,
-  );
 
   if (isExiting) {
     const opacity = interpolate(p, [0, 0.84, 1], exitOpacityStops, clampRange);
@@ -194,8 +114,6 @@ const PushBloomPresentation: React.FC<
       [0, blurMax * 0.28, blurMax],
       clampRange,
     );
-    const brightness = interpolate(p, [0, 1], [1, 0.92], clampRange);
-    const saturate = interpolate(p, [0, 1], [1, 0.96], clampRange);
     const transform = buildTransform({
       x: exitTranslateX * p,
       y: exitTranslateY * p,
@@ -216,16 +134,6 @@ const PushBloomPresentation: React.FC<
           overflow: 'hidden',
         },
       },
-      React.createElement(TransitionSupportLayers, {
-        supportFillColor,
-        supportFillOpacity,
-        bloomColor,
-        bloomOpacity: bloomOpacity * 0.8,
-        bloomRadius,
-        edgeLightOpacity: edgeLightOpacity * 0.85,
-        veilColor,
-        veilOpacity,
-      }),
       React.createElement(
         'div',
         {style: centeredOverscanPlaneStyle(overscanPx)},
@@ -237,21 +145,13 @@ const PushBloomPresentation: React.FC<
               transform,
               transformOrigin: 'center center',
               transformStyle: 'preserve-3d',
-              filter: `blur(${blur}px) saturate(${saturate}) brightness(${brightness})`,
+              filter: `blur(${blur}px)`,
               backfaceVisibility: 'hidden',
             },
           },
           children,
         ),
       ),
-      React.createElement(AbsoluteFill, {
-        style: {
-          background: `radial-gradient(${bloomRadius} at 50% 48%, ${bloomColor}, transparent 72%)`,
-          opacity: bloomOpacity,
-          mixBlendMode: 'screen',
-          pointerEvents: 'none',
-        },
-      }),
     );
   }
 
@@ -262,8 +162,6 @@ const PushBloomPresentation: React.FC<
     [blurMax * 0.72, blurMax * 0.18, 0],
     clampRange,
   );
-  const brightness = interpolate(p, [0, 1], [0.96, 1], clampRange);
-  const saturate = interpolate(p, [0, 1], [0.98, 1], clampRange);
   const transform = buildTransform({
     x: enterTranslateX * (1 - p),
     y: enterTranslateY * (1 - p),
@@ -284,16 +182,6 @@ const PushBloomPresentation: React.FC<
           overflow: 'hidden',
         },
       },
-    React.createElement(TransitionSupportLayers, {
-      supportFillColor,
-      supportFillOpacity,
-      bloomColor,
-      bloomOpacity: bloomOpacity * 0.6,
-      bloomRadius,
-      edgeLightOpacity: edgeLightOpacity * 0.72,
-      veilColor,
-      veilOpacity: veilOpacity * 0.75,
-    }),
     React.createElement(
       'div',
       {style: centeredOverscanPlaneStyle(overscanPx)},
@@ -305,22 +193,13 @@ const PushBloomPresentation: React.FC<
             transform,
             transformOrigin: 'center center',
             transformStyle: 'preserve-3d',
-            filter: `blur(${blur}px) saturate(${saturate}) brightness(${brightness})`,
+            filter: `blur(${blur}px)`,
             backfaceVisibility: 'hidden',
           },
         },
         children,
       ),
     ),
-    React.createElement(AbsoluteFill, {
-      style: {
-        background:
-          'linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.0) 44%)',
-        opacity: edgeLightOpacity * 0.7,
-        mixBlendMode: 'screen',
-        pointerEvents: 'none',
-      },
-    }),
   );
 };
 

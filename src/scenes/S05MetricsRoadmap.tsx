@@ -12,11 +12,11 @@ import { orbitron, montserrat } from '../lib/fonts';
 import { snappySpring } from '../lib/springs';
 import { theme } from '../lib/theme';
 
-const SCENE_TOTAL = 84;
-const FADE_TO_BLACK = 74;
+const SCENE_TOTAL = 97;
+const FADE_TO_BLACK = 87;
 
 const BEAT1_START = 0;
-const BEAT1_END = 48;
+const BEAT1_END = 43;
 const BEAT2_START = 38;
 const BEAT2_END = SCENE_TOTAL;
 
@@ -25,6 +25,27 @@ const countToText = (value: number, unit: 'k' | 'plain') => {
     return `${Math.max(0, Math.round(value / 1000)).toLocaleString()}k+`;
   }
   return `${Math.max(0, Math.round(value)).toLocaleString()}+`;
+};
+
+const countToPreviewText = (
+  value: number,
+  valueTarget: number,
+  unit: 'k' | 'plain',
+) => {
+  if (unit === 'k') {
+    const previewK = Math.max(0, Math.floor(value / 1000));
+    const targetK = Math.max(0, Math.round(valueTarget / 1000));
+    const clampedPreviewK = Math.min(previewK, Math.max(0, targetK - 1));
+    return `${clampedPreviewK.toLocaleString()}k+`;
+  }
+
+  const previewPlain = Math.max(0, Math.floor(value));
+  const targetPlain = Math.max(0, Math.round(valueTarget));
+  const clampedPreviewPlain = Math.min(
+    previewPlain,
+    Math.max(0, targetPlain - 1),
+  );
+  return `${clampedPreviewPlain.toLocaleString()}+`;
 };
 
 interface MetricBeatProps {
@@ -52,7 +73,7 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
     frame: Math.max(0, frame - start),
     fps,
     config: snappySpring,
-    durationInFrames: 24,
+    durationInFrames: 19,
   });
 
   const subtitleRevealStart = start + 7;
@@ -69,21 +90,37 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
   );
   const subtitleSettled = frame >= subtitleRevealEnd;
 
-  const countProgress = spring({
-    frame: Math.max(0, frame - (start + 2)),
-    fps,
-    config: { damping: 22, stiffness: 240, mass: 0.7, overshootClamping: true },
-    durationInFrames: 26,
-  });
+  const countEase = Easing.bezier(0.18, 0.84, 0.24, 1);
+  const countStart = start + 2;
+  const countProgress = interpolate(
+    frame,
+    [countStart, countStart + 17],
+    [0, 1],
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: countEase,
+    },
+  );
 
-  const depthY = (1 - pop) * 64;
-  const depthScale = 0.78 + pop * 0.22;
+  const rawDepthY = (1 - pop) * 64;
+  const rawDepthScale = 0.78 + pop * 0.22;
+  const valueSettled = rawDepthY <= 0.25 && Math.abs(rawDepthScale - 1) <= 0.002;
+  const depthY = valueSettled ? 0 : rawDepthY;
+  const depthScale = valueSettled ? 1 : rawDepthScale;
+  const valueOpacity = valueSettled ? 1 : pop;
   const glowColor =
     glow === 'gold'
       ? 'rgba(229,184,11,0.55), 0 0 140px rgba(229,184,11,0.2)'
       : 'rgba(131,56,236,0.55), 0 0 160px rgba(131,56,236,0.2)';
   const ruleColor = glow === 'gold' ? theme.colors.gold : theme.colors.purpleSoft;
-  const valueText = countToText(valueTarget * countProgress, unit);
+  const animatedValueText = countToPreviewText(
+    valueTarget * countProgress,
+    valueTarget,
+    unit,
+  );
+  const finalValueText = countToText(valueTarget, unit);
+  const finalLocked = countProgress >= 1 && valueSettled;
   const subtitleY = subtitleSettled ? 0 : Math.round((1 - subtitleProgress) * 14);
   const subtitleOpacity = subtitleSettled ? 1 : subtitleProgress;
   const ruleWidth = subtitleSettled ? 220 : Math.round(subtitleProgress * 220);
@@ -108,12 +145,71 @@ const MetricBeat: React.FC<MetricBeatProps> = ({
             letterSpacing: '-0.04em',
             lineHeight: 0.82,
             textAlign: 'center',
-            transform: `translateY(${depthY}px) scale(${depthScale})`,
-            opacity: pop,
+            transform: finalLocked
+              ? 'none'
+              : `translate3d(0, ${depthY}px, 0) scale(${depthScale})`,
+            opacity: finalLocked ? 1 : valueOpacity,
+            transformOrigin: 'center center',
             textShadow: `0 0 72px ${glowColor}`,
+            fontVariantNumeric: 'tabular-nums lining-nums',
+            fontFeatureSettings: '"tnum" 1, "lnum" 1',
           }}
         >
-          {valueText}
+          <span
+            style={{
+              position: 'relative',
+              display: 'inline-grid',
+              justifyItems: 'center',
+              alignItems: 'center',
+              minWidth: `${Math.max(1, finalValueText.length)}ch`,
+            }}
+          >
+            {finalLocked ? (
+              <>
+                <span
+                  aria-hidden
+                  style={{
+                    visibility: 'hidden',
+                  }}
+                >
+                  {finalValueText}
+                </span>
+                <span
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'grid',
+                    placeItems: 'center',
+                  }}
+                >
+                  {finalValueText}
+                </span>
+              </>
+            ) : (
+              <>
+                <span
+                  aria-hidden
+                  style={{
+                    visibility: 'hidden',
+                  }}
+                >
+                  {finalValueText}
+                </span>
+                <span
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'grid',
+                    placeItems: 'center',
+                  }}
+                >
+                  {animatedValueText}
+                </span>
+              </>
+            )}
+          </span>
         </div>
 
         <div
